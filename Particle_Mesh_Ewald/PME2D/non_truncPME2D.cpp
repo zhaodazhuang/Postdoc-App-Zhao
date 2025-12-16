@@ -523,7 +523,7 @@ void calc_Euler_splines_coeffs(int& n_order,
     * -----------------------------------------------
     */
    
-    std::vector<double> M_k(n_order);
+    std::vector<double> M_k(n_order+1);
 
     // initialize : order k = 2
     M_k[0] = 0.e0; 
@@ -689,14 +689,16 @@ void calc_B_splines_coeffs(int& npar,
     * -----------------------------------------------------------
     */
     for (int k = 3; k <= n_order; ++k ){
- 
-        for (int i = 0; i < npar; ++i ){ 
-            // M_{k-1}(uui+k) = 0
-            Mn_1[i][k] =  0.e0;  
-            Mn_2[i][k] =  0.e0;  
-            Mn_3[i][k] =  0.e0;
+
+        if ( k < n_order ) { 
+            for (int i = 0; i < npar; ++i ){ 
+                // M_{k-1}(uui+k) = 0
+                Mn_1[i][k] =  0.e0;  
+                Mn_2[i][k] =  0.e0;  
+                Mn_3[i][k] =  0.e0;
+            }
         }
-  
+
 
         for (int j = k-1; j > 0; j=j-1){ 
             // not need M_{k}(uui+k)
@@ -721,9 +723,11 @@ void calc_B_splines_coeffs(int& npar,
                 //                  uui+j                  k-(uui+j)
                 // M_{k}(uui+j) = ------- M_{k-1}(uui+j) + --------- M_{k_1}(uui+j-1)
                 //                   k-1                     k-1
+
                 Mn_1[i][j] = (uuX*Mn_1[i][j] + (double(k)-uuX)*Mn_1[i][j-1])/double(k-1);
                 Mn_2[i][j] = (uuY*Mn_2[i][j] + (double(k)-uuY)*Mn_2[i][j-1])/double(k-1);
                 Mn_3[i][j] = (uuZ*Mn_3[i][j] + (double(k)-uuZ)*Mn_3[i][j-1])/double(k-1);
+
             } 
   
   
@@ -737,7 +741,8 @@ void calc_B_splines_coeffs(int& npar,
         *
         *-----------------------------------------------------------
         */
-  
+ 
+ 
         if (k == n_order){
 
            for (int i = 0; i < npar; ++i ){ 
@@ -758,7 +763,6 @@ void calc_B_splines_coeffs(int& npar,
             Mn_3[i][0] = (uZ[i]-int(uZ[i]))*Mn_3[i][0]/double(k-1);
         }    
        
-
 
     } // loop for k
   
@@ -811,7 +815,7 @@ void calc_interaction_mesh(double& lX,
     double kX, kY;
     double invlX = 1.e0/lX;
     double invlY = 1.e0/lY;
-    double twopi = 2.e0*acosf(-1.e0);
+    double twopi = 2.e0*acos(-1.e0);
      
     double h, zgrid;
     double scalor = acosf(-1.e0)/(lX*lY);
@@ -923,7 +927,7 @@ void calc_recSpace_Energy_Force(int& npar,
                                 std::vector<std::complex<double>>& Euler_b_2,
                                 std::vector<std::complex<double>>& Euler_b_3,
                                 std::vector<std::vector<std::vector<std::complex<double>>>>& interaction_mesh,
-				double& E,
+                				double& E,
                                 std::vector<double>& FX,
                                 std::vector<double>& FY,
                                 std::vector<double>& FZ){
@@ -933,7 +937,7 @@ void calc_recSpace_Energy_Force(int& npar,
     double invlY = 1.e0/lY;
     double invlZ = 1.e0/lZ;
 
-    double twopi = 2.e0*acosf(-1.e0); 
+    double twopi = 2.e0*acos(-1.e0); 
 
     for (int i = 0; i < npar; ++i ){
         FX[i] = 0.e0;  FY[i] = 0.e0;  FZ[i] = 0.e0; 
@@ -957,7 +961,7 @@ void calc_recSpace_Energy_Force(int& npar,
         uu = rY[i] - round(rY[i]*invlY)*lY; uY[i] = double(Kmax2)*(invlY*uu+0.5e0);
         uu = rZ[i]; uZ[i] = double(Kmax3)*(invlZ*uu);
     }
-      
+
     
     /*-------------------------------------------------------------------
     * STEP 2: Obtain B-splines interpolation coefficient 
@@ -981,8 +985,8 @@ void calc_recSpace_Energy_Force(int& npar,
                           n_order,
                           Mn_1, Mn_2, Mn_3,
                           dMn_1, dMn_2, dMn_3); 
-  
-  
+ 
+
     std::vector<std::vector<std::vector<double>>>
     	charge_grid(Kmax1, std::vector<std::vector<double>>
                    (Kmax2, std::vector<double>
@@ -1031,8 +1035,16 @@ void calc_recSpace_Energy_Force(int& npar,
                     charge_grid[k1][k2][k3] = charge_grid[k1][k2][k3]
                               + q[i]*Mn_1[i][l]*Mn_2[i][k]*Mn_3[i][j];
     }   }   }   }
-  
-  
+/* 
+    std::cout.precision(16);
+    for (int k3 = 0; k3 < Kmax3; ++k3) {
+    for (int k2 = 0; k2 < Kmax2; ++k2) {
+    for (int k1 = 0; k1 < Kmax1; ++k1) {
+          //  if (charge_grid_complex[k1][k2][k3].real() < 0.0) {
+                std::cout << "[" << k1 << "][" << k2 << "][" << k3
+                          << "] = " << charge_grid[k1][k2][k3] << std::endl;
+   } } }    //        }
+*/
     /*--------------------------------------------------------
     * STEP 3: Obtain F[Q](-m1, -m2, -m3) form FFT
     *   
@@ -1059,14 +1071,25 @@ void calc_recSpace_Energy_Force(int& npar,
                 charge_grid_complex[k1][k2][k3] = {charge_grid[k1][k2][k3],0.e0};
     }   }   }
   
-  
+/*
+    std::cout.precision(16);
+    for (int k3 = 0; k3 < Kmax3; ++k3) {
+   for (int k2 = 0; k2 < Kmax2; ++k2) {
+   for (int k1 = 0; k1 < Kmax1; ++k1) {
+            if (charge_grid_complex[k1][k2][k3].real() < 0.0) {
+                std::cout << "[" << k1 << "][" << k2 << "][" << k3
+                          << "] = " << charge_grid_complex[k1][k2][k3].real() << std::endl;
+   } } }            }
+*/
+
     bool is_negetive = true;
     Fast_Fourier_Transform_3D(Kmax1, Kmax2, Kmax3,
                               key1,key2,key3, 
                               ww1,ww2,ww3,
                               charge_grid_complex,
-   			      is_negetive );
-  
+             			      is_negetive );
+ 
+ 
     /*-------------------------------------------------------
     *  STEP 4: Obtain 
     *    
@@ -1212,10 +1235,6 @@ void calc_recSpace_Energy_Force(int& npar,
 }
 
 
-
-
-
-
 int main(){
 
     int npar = 2;
@@ -1241,8 +1260,8 @@ int main(){
 
     double r4pie;
     calc_unit_conversion_coeffs( r4pie ); // Conversion of reduced units
- 
-    double alpha = 0.4e0; // Ewald parameter
+
+    double alpha = 0.5e0; // Ewald parameter
 
 
 
@@ -1251,9 +1270,9 @@ int main(){
 //////////////////////////////////////////////////
      
     int n_order = 4; // interpolation order 
-    int Kmax1 = 64;
-    int Kmax2 = 64;
-    int Kmax3 = 64; // PME mesh size 
+    int Kmax1 = 16;
+    int Kmax2 = 16;
+    int Kmax3 = 16; // PME mesh size 
 
 
     //Calculate the primitive root of unity and bit address which FFT requires
@@ -1285,13 +1304,11 @@ int main(){
 
     // calculacte the FT of interaction mesh 
     calc_interaction_mesh(lX, lY, lZ, 
-		          alpha,
-			  Kmax1, Kmax2, Kmax3,
-			  key1, key2, key3,
-			  ww1, ww2, ww3,
+        		          alpha,
+	             		  Kmax1, Kmax2, Kmax3,
+			              key1, key2, key3,
+			              ww1, ww2, ww3,
                           interaction_mesh);
-
-
    
     double recE;
     std::vector<double> recFX(npar);
@@ -1308,16 +1325,18 @@ int main(){
                                key1, key2, key3, 
                                ww1, ww2, ww3,
                                Euler_b_1, Euler_b_2, Euler_b_3,
-			       interaction_mesh,
+			                   interaction_mesh,
                                recE, 
                                recFX, recFY, recFZ);
 
 
+    std::cout.precision(16);
+    std:: cout << recE << std::endl;
 
 ////////////////////////////////////////////////
 // energy and force in R-space
 ///////////////////////////////////////////////
-    double pi = acosf(-1.e0);
+    double pi = acos(-1.e0);
     double dirE;
     double l;   
  
