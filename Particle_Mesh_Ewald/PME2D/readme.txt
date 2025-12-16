@@ -1,1 +1,1 @@
-
+This repository contains two implementations of the truncation-error-free PME2D method. The C++ version (non_trunc_PME2D.cpp) runs on CPU, while the CUDA version (non_trunc_PME2D.cu) accelerates computation on GPU. Both implementations produce consistent results with minor floating-point differences (< 1e-7 relative error). Compile the CUDA version with: nvcc -arch=sm_89 non_trunc_PME2D.cu -lcufft -lcublas -o a.out
