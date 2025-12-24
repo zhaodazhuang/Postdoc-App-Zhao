@@ -1,0 +1,466 @@
+\documentclass[aps,pre,reprint,superscriptaddress,longbibliography]{revtex4-1}
+\usepackage{scrextend} %,wasysym}
+\usepackage{amsmath,amssymb,graphicx,subfigure,color,times,tabularx,hyperref,fancyhdr}
+\usepackage{esint}
+\begin{document}
+%\title{The boundary term of and the finite-size correction to the Madelung Problem}
+\title{The Madelung Problem of Finite Crystals}
+\author{Yihao Zhao}
+\affiliation{Key Laboratory of Laser \& Infrared System of Ministry of Education, Shandong University, Qingdao 266237, P. R. China}
+\affiliation{Qingdao Institute for Theoretical and Computational Sciences (QiTCS), Center for Optics Research and Engineering, Shandong University, Qingdao 266237, P. R. China}
+%\author{Cong Pan}
+%\affiliation{College of Data Science, Jiaxing University, Jiaxing City, Zhejiang Province, P. R. China}
+\author{Zhonghan Hu} \email{zhonghanhu@sdu.edu.cn}
+\affiliation{Key Laboratory of Laser \& Infrared System of Ministry of Education, Shandong University, Qingdao 266237, P. R. China}
+\affiliation{Qingdao Institute for Theoretical and Computational Sciences (QiTCS), Center for Optics Research and Engineering, Shandong University, Qingdao 266237, P. R. China}
+%\date{\today}
+\begin{abstract}
+%The Coulomb energy of an ion located deep within the interior of a finite crystal of size $p$ can be decomposed into contributions from characteristic displacement vectors ${\mathbf r}=(x,y,z)$ to its neighbors.
+%Each such contribution consists of three distinct parts:
+%(i) a bulk term, which is a periodic function of ${\mathbf r}$; (ii) a non-periodic quadratic term that captures boundary effects due to the long-range nature of Coulomb interactions; and
+%(iii) a finite-size correction whose leading-order term is explicitly given by $[40(x^4+y^4+z^4) -24r^4]/[9\sqrt{3} (2p+1)^2]$ for a cubic crystal with unit lattice constant.
+%This decomposition enables a highly accurate direct summation method that converges rapidly even with minimal supercells---requiring only $p=1$ ($3\times3\times3$ unit cells) for hand calculations of Madelung constants.
+%The approach applies broadly across ionic crystal structures, including rocksalt (NaCl), zincblende (ZnS), fluorite (CaF$_2$), perovskite (CaTiO$_3$), and CsCl.
+%The results additionally provide intuitive insight into the relationships among Madelung constants across different lattices and into the distinction between conventional periodic boundary conditions and the geometry of the Clifford torus.
+The Coulomb energy of an interior ion in a finite crystal of size $p$ decomposes into contributions from displacement vectors ${\mathbf r}=(x,y,z)$ to its neighbors. 
+Each contribution consists of three distinct parts: a periodic bulk term, a quadratic boundary term, and a finite-size correction whose leading order term is $[40(x^4+y^4+z^4)-24r^4]/[9\sqrt{3} (2p+1)^2]$ for cubic crystals with unit lattice constant. 
+This decomposition yields a rapidly convergent direct summation method, accurate even at $p=1$ ($3^3$ cells), enabling simple hand calculations of Madelung constants for NaCl, ZnS, CaF$_2$, CaTiO$_3$, CsCl and so on. 
+It is applicable to both standard periodic boundaries and alternatives like the Clifford torus, thus revealing universal relationships among Madelung constants.
+\end{abstract} \maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The classical Madelung problem concerns the calculation of the electric potential at the site of a single ion in an ionic crystal lattice (such as NaCl or CsCl)\cite{Madelung1918}.
+This potential, when scaled by the electric potential due to an isolated counter ion at the nearest neighbor distance, defines the Madelung constant---a key dimensionless quantity that characterizes the total electrostatic energy per ion pair in the lattice.
+However, the calculation is mathematically subtle because the surrounding cations and anions are arranged in an infinite, alternating three-dimensional array.
+A naive direct summation over expanding spheres or cubes does not always converge rapidly and may even yield different results depending on the summation order, due to the conditionally convergent nature of the Coulomb series\cite{DeLeeuw_Smith1980,Smith1981}.
+
+The most commonly used method was proposed by Ewald\cite{Ewald1921}, now often referred to as the three-dimensional Ewald summation associated with the tinfoil (conducting) boundary condition\cite{DeLeeuw_Smith1980}.
+The Ewald method introduces an adjustable parameter that splits the Coulomb interaction into two parts: a near-field contribution evaluated in real space and a far-field contribution computed in reciprocal space via integral transforms.
+While this indirect method---and related approaches (e.g., Refs.\cite{Nijboer1957,Borwein1985})---converges rapidly to the correct value, the rate of convergence depends on the choice of the parameter and considerable effort is required to implement the somewhat complex formalism accurately.
+
+In contrast, simpler formulations of the Madelung constant can be achieved through modifications to direct summation methods\cite{Evjen1932,Harrison2006,Marathe1983,Sousa1993,Derenzo2000,Gelle2008}.
+In an early approach suggested by Evjen\cite{Evjen1932}, the charges located at the outmost surface of a finite crystal are reduced by factors of $1/2$, $1/4$, and $1/8$ for ions on the faces, edges and corners, respectively.
+This renormalization of charges ensures the overall charge neutrality and often improve convergence. However, for certain crystal structures---such as the famous case of CsCl---it fails to converge to the correct Madelung constant.
+Alternatively, Harrison proposed introducing a uniformly charged spherical shell of radius $R$ and total charge $-Q$ to neutralize the spherical crystal of the same radius but net charge $Q$\cite{Harrison2006}.
+This charged shell results in an correction term to the electric potential at the central ion, given by $-Q/R$ in Gaussian unit, which must be added to the direct sum over lattice ions.
+While conceptually simple, this method converges slowly; for example, a large cluster with radius $R$ extending to hundreds of the lattice constant is required to achieve an accuracy of $10^{-3}$ in the calculated Madelung constant for CsCl.
+To accelerate convergence, one can employ more sophisticated renormalization schemes that enforce not only overall charge neutrality but also the cancellation of higher-order multipolar moments---such as dipole, quadrupole, and beyond---within a finite crystal\cite{Marathe1983,Sousa1993,Derenzo2000,Gelle2008}.
+Designing such charge distributions is highly non-trivial as it involves solving a constrained optimization problem.
+Gelle and Lepetit addressed this by systematically overestimating the finite-size error to derive an analytic expression of renormalization factors that allows the cancellation of a prescribed number of multipolar moments\cite{Gelle2008}.
+Their method reaches an exponential convergence rate, comparable with the Ewald method and is particularly useful for cluster {\it ab initio} calculations (e.g.\cite{Leveque_Lepetit2024}).
+However, the renormalization of a large number of charges becomes necessary for an accurate determination of Madelung constants.
+
+\begin{figure}[!htb]\centerline{\includegraphics[width=7.7cm]{./toc} }          %---------------------  Figure -------------------------------------
+\caption{Two-dimensional cross-sectional view of two particles with unit charges ($\pm 1$) separated by vector ${\mathbf r}=(x,y,z)$ and their periodic images under standard periodic boundary conditions (left) and in the CS method (right).
+For the conventional direct sum, the potential at the reference particle (black dot) is obtained by summing the Coulomb interactions---proportional to the inverse inter-particle distance---from all periodic images, as described by Eq.~\eqref{eq:pw}.
+In the CS method, with $K^3$ unit cells and unit lattice constant ($l_x=l_y=l_z=1$), the conventional Euclidean distance $|\mathbf{r} + \mathbf{n}|$ is replaced by the renormalized distance $d(\mathbf{r}, \mathbf{n})$ (see Eqs.~\eqref{eq:rd} and~\eqref{eq:cspw}).\label{fig:rd}}\end{figure}
+Rather than renormalizing charges, Tavernier {\it et al.} replace the standard periodic lattice with a geometry based on the Clifford torus, effectively embedding the system into a curved, compact manifold\cite{Tavernier2020}. 
+In this framework, the distance between any two points is redefined using the intrinsic geometry of the torus.
+Consider two particles separated by a displacement ${\mathbf r}=(x,y,z)$, as illustrated in Fig.~\ref{fig:rd}.
+In conventional direct sum treatments, the distance from the first particle to an image of the second---located in a unit cell translated by lattice vector ${\mathbf n}=(n_x,n_y,n_z)$---is given by the Euclidean norm $|{\mathbf r} + {\mathbf n}|$.
+In the Clifford supercell (CS) method, for a cubic lattice with unit lattice constant and $K$ unit cells along each dimension, this distance is replaced by the following renormalized form\cite{Aragao2019,Tavernier2020}:
+\begin{equation}  d({\mathbf r},{\mathbf n}) = \frac{K}{\sqrt{2}\pi}\left[ 3 - \sum_{\alpha=1}^3 \cos \frac{2\pi ({\mathbf r}+{\mathbf n})\cdot {\mathbf e}_\alpha}{K} \right]^{1/2}, \label{eq:rd} \end{equation}
+%\begin{equation}  d({\mathbf r},{\mathbf n}) = \frac{K}{\sqrt{2}\pi}\left( 3 - \sum_{\alpha=1}^3 \cos \left[ 2\pi ({\mathbf r}+{\mathbf n})\cdot {\mathbf e}_\alpha/K \right] \right)^{1/2},\end{equation}
+where ${\mathbf e}_1$, ${\mathbf e}_2$, and ${\mathbf e}_3$ are the orthogonal unit vectors along the $x$, $y$, $z$ directions, respectively.
+This geometric renormalization scheme is both straightforward to implement and naturally generalizable to arbitrary dimensions\cite{Tavernier2021}.
+Tavernier {\it et al.} have demonstrated that their direct summation approach---termed the Clifford supercell (CS) method---achieves an error scaling of ${\cal O}(K^{-2})$ when using a $K\times K\times K$ supercell\cite{Tavernier2020}.
+
+In this work, we address the slow convergence of direct summation methods by analytically incorporating higher-order multipolar contributions through exact closed-form corrections---without resorting to charge or distance renormalization.
+While extending this approach to arbitrary Bravais lattices remains challenging, it can be rigorously formulated in a clean manner for centro-symmetric orthogonal lattices using supercells of odd linear size, $K = 2p + 1$, where $p$ is a non-negative integer.
+For the two-particle configuration depicted in Fig.~\ref{fig:rd}, we derive explicit leading-order corrections to the electric potential at the reference particle in the central unit cell with unit side lengths.
+The dipolar contribution, which is independent of $p$, is given by
+\begin{equation} \nu_2({\mathbf r}) = 2\pi r^2 / 3, \end{equation}
+where $r=\left| {\mathbf r} \right|$. 
+This term remains constant across different sizes of supercells and precisely cancels the boundary term associated with the cubic geometry in the direct summation\cite{Zhao_Hu2025}, reflecting the long-range nature of the Coulomb interaction.
+The quadrupolar correction depends on both the interparticle vector and the supercell size:
+\begin{equation} \nu_4({\mathbf r},p) = \frac{40(x^4+y^4+z^4) - 24r^4 }{9\sqrt{3} (2p+1)^2}. \label{eq:corr41} \end{equation}
+Incorporating these analytical corrections into the conventional direct sum significantly accelerates convergence, reducing the total error from ${\cal O}(K^{-2})$ in the CS method to ${\cal O}(K^{-4})$.
+Remarkably, high accuracy is achieved even with minimal supercells: for CsCl, using only $p=1$ ($K=3$) yields a Madelung constant accurate to within $10^{-4}$ of the converged value. 
+Similar precision is observed across a range of ionic crystals---including NaCl, ZnS, CaF$_2$, and CaTiO$_3$---demonstrating the broad applicability and efficiency of the proposed correction scheme.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+It is well known that the Coulomb lattice sum is a conditionally convergent series whose value depends on the macroscopic shape of the crystal\cite{DeLeeuw_Smith1980,Smith1981}.
+A rigorous treatment therefore requires defining a sequence of finite crystals that grow in size while maintaining a fixed geometric shape.
+We consider an orthogonal lattice where the lattice constants $l_x$, $l_y$, and $l_z$ represent the edge lengths of the orthorhombic unit cell.
+For a centro-symmetric crystal composed of one central primitive cell and $ N_1 $, $ N_2 $, $ N_3 $ replicated cells extending symmetrically along the $\pm x$, $\pm y$, and $\pm z$-directions, respectively, the position of each unit cell is specified by the lattice vector
+\begin{equation} \mathbf{n} = (n_x, n_y, n_z) = (n_1 l_x, n_2 l_y, n_3 l_z), \end{equation}  
+where $ n_1, n_2, n_3 $ are integers in the range $-N_\alpha \leqslant n_\alpha \leqslant N_\alpha$ for $\alpha=1,2,3$.
+The overall dimensions of the resulting cuboid are therefore $a=(2N_1+1)l_x$, $b=(2N_2+1)l_y$, and $c=(2N_3+1)l_z$.
+
+In the isotropic case where $ N_1 = N_2 = N_3 = p $, the crystal retain the same aspect ratios as the primitive cell:
+\begin{equation} a : b : c = l_x : l_y : l_z. \end{equation}  
+Thus, as $p$ increases from zero,  the sequence of crystals maintains a fixed shape under isotropic growth.
+
+For the general anisotropic case, we define an effective size $p$ such that $2p+1$ equals the greatest common divisor of $2N_1+1$, $2N_2+1$ and $2N_3+1$. 
+This condition implies the simultaneous factorizations:
+\[ 2N_\alpha + 1 = (2s_\alpha + 1)(2p+1) \quad\text{for}\quad \alpha = 1,2,3, \]
+%\begin{equation} \left\{ \begin{aligned} 2N_1 + 1 &= (2s_1+1)(2p+1) \\ 2N_2 + 1 &= (2s_2+1)(2p+1)\\ 2N_3+1 &= (2s_3+1)(2p+1) \end{aligned} \right., \end{equation}
+where the quotients ($2s_1+1$, $2s_2+1$, $2s_3+1$) form a co-prime triplet---i.e., their only common divisor is $1$.
+As $p$ increases with fixed ${\mathbf s}=(s_1,s_2,s_3)$, the crystal dimensions evolve as:
+$a=(2p+1)(2s_1+1)l_x$, $b=(2p+1)(2s_2+1)l_y$, and $c=(2p+1)(2s_3+1)l_z$, giving invariant aspect ratios:
+\begin{equation} a:b:c =(2s_1+1)l_x \,:\, (2s_2+1)l_y \,:\, (2s_3+1)l_z .\end{equation}
+Consequently, all crystals in this sequence maintain an identical geometric shape, uniquely specified by the parameter ${\mathbf s}$ for any given set of lattice constants $(l_x,l_y,l_z)$.
+
+Now, suppose each unit cell consists of $M$ ions with charges $q_j$ located at positions ${\mathbf r}_j$ for $j=1,2,\cdots,M$. 
+The electric potential at the $i$-th ion in the primary cell (${\mathbf n}={\mathbf 0}$) is then given by
+\begin{equation} \phi_p(i) = \sum_{j=1,j\neq i}^M  \frac{q_j}{ \left| {\mathbf r}_j - {\mathbf r}_i \right| } + \sum_{j = 1}^M \sum_{ {\mathbf n}\neq{\mathbf 0} }^{{\cal L}(p|{\mathbf s})} \frac{q_j}{ \left| {\mathbf r}_j  + {\mathbf n} - {\mathbf r}_i \right| }, \end{equation}
+where ${\cal L}(p|{\mathbf s})$ denotes the set of all lattice vectors for the crystal of size $p$ and shape ${\mathbf s}$. 
+Throughout this work, the summation over all lattice vectors is abbreviated as:
+\begin{equation} \sum_{n_1=-N_1}^{N_1} \sum_{n_2=-N_2}^{N_2}\sum_{n_3=-N_3}^{N_3} \equiv \sum_{\mathbf n}^{{\cal L}(p|{\mathbf s})} \equiv \sum_{{\mathbf n}\in {\cal L}(p|{\mathbf s})} ,\end{equation}
+with the exclusion of the central unit cell $\mathbf{n=0}$ handled explicitly when needed.
+Under the condition of charge neutrality, $\sum_{j=1}^M q_j = 0$, the electric potential can be re-expressed as a sum over $M-1$ effective pairwise interactions:
+\begin{equation} \phi_p(i) = \sum_{j=1,j\neq i}^M  q_j \nu({\mathbf r}_j-{\mathbf r}_i,p|{\mathbf s}), \end{equation}
+where the effective pairwise interaction is defined as\cite{Hu2014ib,Yi_Hu2017pairwise,Zhao_Hu2025}
+\begin{equation} \nu({\mathbf r},p|{\mathbf s}) = \frac{1}{r} + \sum_{ {\mathbf n}\neq {\mathbf 0} }^{{\cal L}(p|{\mathbf s})} \left[ \frac{1}{\left| {\mathbf r} + {\mathbf n} \right | }  - \frac{1}{n} \right], \label{eq:pw} \end{equation}
+where $n=|{\mathbf n}|=\sqrt{n_x^2+n_y^2+n_z^2}$. This expression gives the electric potential at the reference particle depicted in Fig.~\ref{fig:rd}.
+
+As $p\to \infty$,  the interaction converges to a well-defined limit, $\nu({\mathbf r},\infty|{\mathbf s})$, which comprises two distinct terms:
+\begin{equation} \nu({\mathbf r},\infty|{\mathbf s}) = \nu_{\rm pbc}({\mathbf r}) + \nu_{\rm ib}({\mathbf r}|{\mathbf s}). \end{equation}
+Here, $\nu_{\rm pbc}({\mathbf r})$ is independent of the geometry specified by ${\mathbf s}$ and represents the bulk contribution under the periodic boundary condition (pbc)\cite{Hu2014ib,Yi_Hu2017pairwise,Zhao_Hu2025}.
+It has served as a foundational element in the analytical derivation of structural correlations in bulk systems\cite{Hu2022} and dielectric response at interfaces\cite{Pan_Hu2017,Pan_Hu2019}.
+In this work, we instead focus on accurately computing $\nu_{\rm pbc}({\mathbf r})$ using simple direct summation methods augmented by analytical finite-size corrections.
+
+The second term, $\nu_{\rm ib}({\mathbf r}|{\mathbf s})$  accounts for the arrangement of charges at the infinite boundary (ib)\cite{Zhao_Hu2025}. In reciprocal space, it can be expressed as\cite{Hu2014ib,Zhao_Hu2025} 
+\begin{equation} \nu_{\rm ib}({\mathbf r}|{\mathbf s}) = -\frac{2\pi}{V} \lim_{ {\mathbf k}| {\mathbf s} \to 0 } \frac{\left( {\mathbf k}\cdot {\mathbf r} \right)^2}{\left| {\mathbf k} \right| ^2}, \end{equation}
+where $V=l_xl_yl_z$ is the volume of a unit cell and the limit is taken such that the wavevector ${\mathbf k}$ approaches zero along a direction determined by the aspect ratios encoded in ${\mathbf s}$.
+This expression clearly shows that $\nu_{\rm ib}({\mathbf r}|{\mathbf s})$ is always non-positive. 
+Alternatively, in real space, $\nu_{\rm ib}({\mathbf r}|{\mathbf s})$ can be interpreted as the electrostatic interaction between a dipole at the origin and a uniformly polarized medium filling the crystal volume\cite{Smith2008,Ballenegger2014,Pan2017,Zhao_Hu2025}
+\begin{equation} \nu _{\rm ib}({\mathbf r}|{\mathbf s}) = \frac{1}{2V} \int_{\Omega(p|{\mathbf s})} d{\mathbf x} \, \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^2\frac{1}{\left| {\mathbf x}\right|}, \label{eq:ib} \end{equation} 
+where the integration domain $\Omega(p|{\mathbf s})$ denotes the total volume of the crystal
+\begin{equation} \Omega(p|{\mathbf s}) = abc = V (2p+1)^3 \Pi_{\alpha = 1}^3 (2s_\alpha+1). \end{equation}
+Notably, although the integral appears to depend on the size $p$ through $\Omega(p|{\mathbf s})$, an explicit evaluation of the integral (see Supporting Information) reveals that
+the result actually depends only on ${\mathbf r}$ and the macroscopic shape of the crystal---specifically, its aspect ratios determined by ${\mathbf s}$ and $(l_x,l_y,l_z)$. 
+As will be shown below, the independence of this integral on $p$ is crucial for analyzing finite-size corrections and constructing analytical correction schemes that achieve rapid convergence.
+
+For any finite crystal of size $p$, the effective pairwise interaction $\nu({\mathbf r},p|{\mathbf s})$ deviates from $\nu({\mathbf r},\infty|{\mathbf s})$ due to truncation of the summation domain,
+\[ \nu({\mathbf r},p|{\mathbf s}) = \nu_{\rm pbc}({\mathbf r}) + \nu_{\rm ib}({\mathbf r}|{\mathbf s}) - \nu_{\rm corr}({\mathbf r},p|{\mathbf s}), \]
+where the correction term $\nu_{\rm corr}({\mathbf r},p|{\mathbf s})$ accounts for the contributions missing from the truncated sum---i.e., those arising from lattice vectors outside the finite crystal. Explicitly,
+\begin{equation} \nu_{\rm corr}({\mathbf r},p|{\mathbf s}) = \sum_{ {\mathbf n}\notin {\cal L}(p|{\mathbf s}) }^{{\cal L}(\infty|{\mathbf s})} \left[ \frac{1}{\left| {\mathbf r} + {\mathbf n} \right | }  - \frac{1}{n} \right],  \label{eq:corr} \end{equation}
+with the sum extending over all lattice vectors excluded from the finite crystal defined by ${\cal L}(p|{\mathbf s})$ but present in the infinite lattice of the same shape ${\cal L}(\infty|{\mathbf s})$.
+
+To estimate $\nu_{\rm corr}({\mathbf r},p|{\mathbf s})$ to a desired accuracy, we expand the term in brackets for the case where  $r \ll n $ (i.e., for distant unit cells) as a multipolar series
+%\begin{equation} \frac{1}{\left| {\mathbf r} + {\mathbf n} \right | }  - \frac{1}{n} =\sum_{k=1}^\infty \frac{r^k P_k(\cos\theta) }{n^{k+1}} =  \sum_{k=1}^\infty \frac{1}{k!} \left({\mathbf r}\cdot \nabla_{\mathbf n} \right)^k\frac{1}{{\mathbf n}}, \label{eq:mulipole} \end{equation}
+\begin{equation} \frac{1}{\left| {\mathbf r} + {\mathbf n} \right | }  - \frac{1}{n} =\sum_{k=1}^\infty \frac{r^k P_k(\cos\theta) }{n^{k+1}} =  \sum_{k=1}^\infty \frac{\left({\mathbf r}\cdot \nabla_{\mathbf n} \right)^k}{k!} \frac{1}{n}, \label{eq:mulpole} \end{equation}
+where $\cos\theta = - {\mathbf r}\cdot {\mathbf n}/(nr)$, $P_k(\cos\theta)$ is the $k$-th Legendre polynomial, and $\nabla_{\mathbf n}$ is the gradient operator with respect to the lattice vector ${\mathbf n}$:
+\begin{equation} \nabla_{\mathbf n} = \frac{\partial }{\partial n_x} {\mathbf e}_1 + \frac{\partial }{\partial n_y} {\mathbf e}_2 + \frac{\partial }{\partial n_z} {\mathbf e}_3. \end{equation}
+Gelle and Lepetit performed a similar multipole expansion using spherical coordinates rather than Cartesian coordinates\cite{Gelle2008}. 
+Their approach facilitates asymptotic estimation of truncation errors and analysis of convergence behavior. 
+In contrast, we derive exact closed-form expressions for the leading-order terms of $\nu_{\rm corr}({\mathbf r},p|{\mathbf s})$ directly in Cartesian coordinates.
+
+Clearly, when $k$ is odd giving $P_k(\cos\theta)$ an odd function of ${\mathbf n}$, the contributions of lattice vectors ${\mathbf n}$ and $-{\mathbf n}$ to Eq.~\eqref{eq:corr} must cancel. 
+It becomes enough to consider terms with $k$ even in the multipolar expansion by considering $P_2(x) = (3x^2 - 1)/2$, $P_4(x)=(35x^4-30x^2+3)/8$, etc. 
+
+For a cubic crystal $(a=b=c)$ of a cubic lattice $(l_x=l_y=l_z)$, ${\mathbf s}=0$ and the leading order can be work out explicitly
+\begin{equation} \nu_4({\mathbf r},p|{\mathbf s}) = \frac{1}{24V}\int_{\Omega(\infty|{\mathbf s}) - \Omega(p|{\mathbf s})} d{\mathbf x}\, \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^4\frac{1}{\left| {\mathbf x}\right|}, \label{eq:corr4} \end{equation}
+This equation is evaluated in the SI and when setting $l_x=l_y=l_z=1$ and treating ${\mathbf r}$ as a fractional coordinate, the above equation identifies with Eq.~\eqref{eq:corr4} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage \, \newpage
+
+
+Here, $\nu_{\rm pbc}({\mathbf r})$ is the electric potential actually used in calculating Madelung constants and $\nu_{\rm ib}({\mathbf r})$ depends on the macroscopic shape of the crystal:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%\textcolor{red}{To be updated Nov. 28}
+
+Wolf discussed the NaCL case \cite{DeLeeuw_Smith1980,Wolf1992}
+The Madelung constants sequence\cite{naclseq,csclseq,znsseq,Ewald1921}.
+
+The decomposition of the electric potential into linear combinations of pairwise potential works well for the CS method. 
+For a cubic crystal (${\mathbf s}={\mathbf 0}$) of size $p$ with unit lattice constants ($l_x=l_y=l_z=1$), the corresponding pairwise potential follows Eq.~\eqref{eq:pw}
+\begin{equation} \nu_{\rm CS}({\mathbf r}) = \frac{1}{d({\mathbf r},{\mathbf 0})} + \sum_{{\mathbf n}\neq {\mathbf 0}}^{{\cal L}(p|{\mathbf 0})}\left[ \frac{1}{d({\mathbf r},{\mathbf n})} - \frac{1}{d({\mathbf 0},{\mathbf n})} \right], \label{eq:cspw} \end{equation}
+where ${\mathbf r}$ is interpreted becomes a fractional vector, i.e., the usual coordinates scaled by the lattice constant.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!htb]   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\caption{Madelung constants of CsCl computed using the explicit finite-size correction [Eqs.~\eqref{eq:madpbc} and~\eqref{eq:corrcub}] (EC) and Clifford supercells (CS)~\cite{Tavernier2020}, for various $p$, where $K = 2p + 1$ is the number of unit cells per side. 
+\footnote{${\mathbf v}_1 = (0.5, 0.5, 0.5)$ is the relative vector between Cs$^+$ and Cl$^-$ scaled by the lattice constant.
+The reference value is $1.762\,674\,773\,070\,98$~\cite{Tavernier2020}; residual errors after the leading-order correction decay as $p^{-4}$.}}\label{tab:cscl}
+\begin{tabular}{ccclc}\hline $K$ &  $\,\quad p\quad\,$ & $\,\quad\sqrt{3}\nu_{\rm pbc}({\mathbf v}_1)/2\,\quad$ &    $\,$ abs. error $\,$   &   $\quad\quad$ CS $\quad\quad$   \\[0.4ex] \hline
+                              3  &         1           &               1.76297802554                  & \,\,3.0 $\times 10^{-4}$   &         1.408794302               \\[0.5ex]
+                             11  &         5           &               1.76267218149                  &    -2.6 $\times 10^{-6}$   &         1.744082409               \\[0.5ex]
+                             21  &        10           &               1.76267458135                  &    -1.9 $\times 10^{-7}$   &         1.757701312               \\[0.5ex]
+                             41  &        20           &               1.76267475994                  &    -1.3 $\times 10^{-8}$   &         1.761378689               \\[0.5ex]
+                             81  &        40           &               1.76267477221                  &    -8.6 $\times 10^{-10}$  &         1.762343279               \\[0.5ex]
+                            121  &        60           &               1.76267477290                  &    -1.7 $\times 10^{-10}$  &         1.762526271               \\[0.5ex]\hline
+\end{tabular}\end{table}
+
+For a cubic and even lattice, the infinite boundary term $\nu_{\rm ib}({\mathbf r}) = -2\pi r^2/3$\cite{Smith1981,Hu2014ib,Zhao_Hu2025}, and the correction term
+\begin{equation} \nu_{\rm corr}({\mathbf r}, p) = \frac{24r^4 - 40(x^4+y^4+z^4)}{9\sqrt{3} (2p+1)^2} + {\cal O}(p^{-4})  \label{eq:corrcub} \end{equation}
+The pairwise potential reflecting the effect of periodicity can be computed as
+\begin{equation} \nu_{\rm pbc}({\mathbf r}) = \nu_p({\mathbf r}) + \frac{2\pi r^2}{3} - \nu_{\rm corr}({\mathbf r},p) \label{eq:madpbc} \end{equation}
+where $\nu_p({\mathbf r}) $ is the direct lattice sum over all lattice vectors
+\begin{equation} \nu_p({\mathbf r}) = \frac{1}{r} + \sum_{ {\mathbf n}\neq 0 }^{{\cal L}(p)} \left[ \frac{1}{\left| {\mathbf r} + {\mathbf n} \right | }  - \frac{1}{n} \right]. \label{eq:direct} \end{equation}
+In a simple cubic lattice of $l_x=l_y=l_z$, by permutation symmetry, $\nu_p((x,y,z)) = \nu_p(y,x,z) $ etc. 
+
+{\it CsCl.} We first consider CsCl, whose primitive unit cell contains one Cs$^+$ ion and one Cl$^-$ ion, separated by the reduced vector ${\mathbf v}_1 = (0.5, 0.5, 0.5)$.
+It is well known that spherical truncation schemes lead to oscillatory convergence due to charged surface --- each shell contains only cations or only anions~\cite{Evjen1932}.  
+In contrast, the present method, which preserves cubic/even symmetry and incorporates both the infinite boundary term and the finite-size correction term, yields rapidly converging electrostatic potentials.
+In fact, it is crucial to include $\nu_{\rm ib}$ because it dominates the Madlung constant: $ \pi \sqrt{3}/3 \left| {\mathbf v}_1\right|^2 = \sqrt{3}\pi/4 \simeq 1.36 $ in Eq.~\eqref{eq:madpbc}.
+As shown in Table~\ref{tab:cscl}, the computed Madelung constant, $\sqrt{3}\nu_{\rm pbc}({\mathbf v}_1)/2$, agrees with the reference value to six decimal places using only $K = 21$ unit cells per side ($p = 10$).  
+Moreover, the convergence rate exceeds that based on Clifford supercells (CSC): even at small $p$, such as $p=1$, our approach provides a highly accurate estimate.
+The observed $p^{-4}$ decay of the residual error confirms the effectiveness of the correction scheme.
+
+\begin{table*}[!htb]   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\caption{Reduced coordinates of ions in a cubic unit cell of a typical rocksalt (Na$_4$Cl$_4$), zincblende (Zn$_4$S$_4$) and fluorite (Ca$_4$F$_8$), with the unit cell scaled to unit length: $ l_x = l_y = l_z = 1 $.}\label{tab:unit}
+\begin{tabular}{cccc}\hline  $4$Na$^+$/$4$Ca$^{2+}$           &        $4$Cl$^-$/$4$Zn$^{2+}$          &            $4$S$^{2-}$/$4$F$^-$                    &          \quad$4$F$^-$        \\[0.5ex]
+                                  (0, 0, 0)(0.5, 0, 0.5)      &  (0.5, 0, 0)(0, 0.5, 0)            &    \quad\quad(0.25, 0.25, 0.25)(0.75, 0.25, 0.75)\quad\quad  &    \quad(0.25, 0.25, 0.75)(0.25, 0.75, 0.25) \\[0.5ex]
+                                  (0.5, 0.5, 0)(0, 0.5, 0.5)  & \quad\quad(0, 0, 0.5)(0.5, 0.5, 0.5)\quad\quad  & \quad\quad(0.75, 0.75, 0.25)(0.25, 0.75, 0.75)\quad\quad & \quad(0.75, 0.25, 0.25)(0.75, 0.75, 0.75)\\\hline
+\end{tabular} \end{table*}
+We further consider three types of cubic crystal structures, namely NaCl, ZnS and CaF$_2$, which represent, the rock-salt, the zincblende and the fluorite structures, respectively.
+Their primary unit cells contains 8 (4 Na$^+$ and 4 Cl$^-$), 8 (4 Zn$^{2+}$ and 4 S$^{2-}$) and 12 (4 Ca$^{2+}$ and 8 F$^{-}$) ions, respectively. 
+Tab.~\ref{tab:unit} lists their coordinates scaled by the side length of the cubic unit cell and we briefly discuss the three crystal structures in more detail.
+
+{\it NaCl.}  The NaCl lattice is formed by interpenetrating face-centered Na and face-centered Cl sublattices, displaced relative to each other along the $(0.5, 0.5, 0.5)$ direction.
+When we view it as a simple cubic lattice with the unit cell having a side length twice of the Na-Cl bond distance.
+The cubic unit cell then consists of $4$ Na$^+$ and $4$ Cl$^-$ occupying the $8$ vertices of a smaller cube whose side length equals the Na-Cl bond distance. 
+This cubic (NaCl)$_4$ unit cell form a octopolar molecule with vanishing dipolar and quadropole moments, that is, 
+\begin{equation} \sum_{j=1}^8 q_j r_{ij}^2 = \sum_{j=1}^8 q_j r_{ij}^4 = \sum_{j=1}^8 q_j (x_{ij}^4+y_{ij}^4+z_{ij}^4) = 0, \end{equation}
+Thus,  without corrections, the direct sum over the simple cubic unit by itself already gives quite accurate results of the Madelung constant. 
+Alternatively, the Madelung constant can be treated as contributions from $1$ Na-Cl pair at the reduced vector ${\mathbf v}_1=(0.5, 0.5, 0.5)$, $3$ Na-Cl pair at ${\mathbf v}_2=(0.5, 0, 0)$ and $3$ Na-Na pair at ${\mathbf v}_3=(0.5, 0.5, 0)$
+\[ {\cal M} = \nu_{\rm pbc}({\mathbf v}_1) + {\cal O}(p^{-4}) \]
+
+By symmetry, it is enough to consider contributions from 4 characteristic vectors, ${\mathbf v}_1=(0.5, 0.5, 0.5)$, ${\mathbf v}_2=(0.5, 0, 0)$, ${\mathbf v}_3=(0.5, 0.5, 0)$, and ${\mathbf v}_4=(0.25, 0.25, 0.25)$.
+
+{\it ZnS.} In the zincblende structure of ZnS, the lattice can be viewed as two interpenetrating face-centered cubic lattices, one for Zn and the other for S, displaced from each other by $(0.25, 0.25, 0.25)$ along the body diagonal of the cube.
+
+{\it CaF$_2$} The unit cell of CaF$_2$ consists of $4$ Ca$^{2+}$ and $8$ F$^-$. If Ca$^{2+}$ take the position of 
+
+\begin{table}[!htb]   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\caption{Contributions from characteristic vectors ${\mathbf v}_2 = (0.5, 0, 0)$, ${\mathbf v}_3 = (0.5, 0.5, 0)$, and ${\mathbf v}_4 = (0.25, 0.25, 0.25)$ computed using the explicit finite-size corrections method.}\label{tab:vec3}
+\begin{tabular}{cccc}\hline $p$ & \quad\quad$\nu_{\rm pbc}({\mathbf v}_2)$\quad\quad &\quad\quad $\nu_{\rm pbc}({\mathbf v}_3)$\quad\quad & \quad\quad$\nu_{\rm pbc}({\mathbf v}_4)$\quad\quad \\[0.4ex] \hline
+                            1   &              2.741146342                           &        2.255022524                                 &  2.636876604                       \\[0.5ex]
+                            5   &              2.741365130                           &        2.254776731                                 &  2.636813436                       \\[0.5ex]
+                           10   &              2.741365170                           &        2.254776007                                 &  2.636813483                       \\[0.5ex]
+                           20   &              2.741365174                           &        2.254775952                                 &  2.636813487                       \\[0.5ex]
+                           ref. &              2.741365175                           &        2.254775948                                 &  2.636813487                       \\[0.5ex]\hline
+\end{tabular} \end{table}
+
+\begin{table}[!htb]   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\caption{Madelung constants ($p=20$ or $K=41$) for representative ionic crystals: NaCl (rocksalt), ZnS (zincblende), and CaF$_2$ (fluorite).}\label{tab:Nacl}
+\begin{tabular}{cccc}\hline method & \quad\quad NaCl \quad\quad &\quad\quad ZnS \quad\quad &      \quad F$^-$  \\[0.4ex] \hline
+                            CS     &     \quad    1.7479628535 \quad      &       \quad 1.638065778 \quad      & \quad 0.4114803724 \quad      \\[0.5ex]
+                            EC     &     \quad    1.7475645804 \quad      &       \quad 1.638055048 \quad      & \quad 0.4124341357 \quad      \\[0.5ex]
+                            ref.   &     \quad    1.7475645946 \quad      &       \quad 1.638055053 \quad      & \quad 0.4124341357 \quad      \\[0.5ex]\hline
+\end{tabular} \end{table}
+
+For CaTiO$_3$, Ca$^{2+}$ occupies the center with its coordinate (0.5,0.5,0.5), Ti$^{4+}$ occupies one
+The Madelung constant for characteristic vectors for a typical NaCL structure material.
+$\nu_{\rm pbc} = \nu_p - \nu_{\rm ib} - \nu_{\rm corr}$ where $\nu_p$ is evaluated directly from Eq.~\eqref{eq:direct}.
+
+\begin{table}[!htb]   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\caption{Electrostatic energies of ions and a formula unit in a bulk CaTiO$_3$ crystal where the fraction coordinates of the ions in the primary cell are given by: Ca$^{2+}$ at (0.5, 0.5, 0.5), Ti$^{4+}$ at (0, 0, 0), and O$^{2-}$ at (0.5, 0, 0), (0, 0.5, 0), and (0, 0, 0.5).
+\footnote{Energies are normalized by $e^2/d^2$, where $d$ is the distance between the nearest Ti$^{4+}$--O$^{2-}$ pair.}}\label{tab:catio3}
+\begin{tabular}{lcc}\hline  ions      &  \quad\quad\quad\quad$p=20$\quad\quad\quad\quad      &   ref.            \\[0.4ex] \hline
+                            Ca$^{2+}$ &                   -2.69360486751                     &  -2.69360482491   \\[0.5ex]
+                            Ti$^{4+}$ &                   -12.3774680568                     &  -12.3774680283   \\[0.5ex]
+                             O$^{2-}$ &                   -3.22795439643                     &  -3.22795440114   \\[0.5ex]
+                            cell      &                   -24.7549361136                     &  -24.7549360567   \\[0.5ex]\hline
+\end{tabular} \end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\newpage \,To be updated \newpage \, To be updated \newpage
+%The explicit expression reads
+%\begin{equation} s_2 = \frac{r^2}{n^2} \frac{3\cos^2\theta - 1}{2}  \end{equation}
+%\begin{equation} s_4 = \frac{r^4}{n^4} \frac{35\cos^4\theta - 30 \cos^2\theta + 3}{8}  \end{equation}
+%where $\cos\theta = {\mathbf n}\cdot {\mathbf r}/(nr)$.
+
+
+In this work we give intuitive explanation of the boundary and correction term.  The formulation is verified by deriving the bulk madelung constant for typical cubic crystals such as  NaCl, CsCl, ZnS, CaF$_2$, WO$_3$, and CaTiO$_3$.
+
+\section{Explanation}
+The legendre expansion for $r \ll n$ gives
+\begin{equation} \frac{1}{\left| {\mathbf r}+{\mathbf n} \right|}= \frac{1}{n}  + \frac{1}{n}\sum_{k=1}^\infty \left(\frac{r}{n}\right)^k P_k(\cos\theta) \end{equation}
+where $\cos\theta= {\mathbf n}\cdot{\mathbf r}/(nr)$ and the first explicit polynomials are
+\begin{equation} P_1(x) = x;\quad P_2(x) = \frac{3x^2-1}{2};  \end{equation}
+\begin{equation} P_3(x) = \frac{5x^3 - 3x}{2};\quad P_4(x) = \frac{35x^4 - 30 x^2 + 3}{8}\end{equation}
+A derivation with a mathematical rigor and connection to existing work is given elsewhere.
+
+\section{Conclusions}\label{sec:con}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{IB term}
+The following general expressions , the volume of a unit cell is $V$ and the total volume of the crystal of size $P$ is $\Omega(P)$. $\partial\Omega(P)$ is the surface of the crystal.
+\begin{equation} \nu_{\rm ib}({\mathbf r}) = - \frac{1}{2V} \lim_{\mathbf k\to 0} \frac{4\pi\left({\mathbf k}\cdot{\mathbf r}\right)^2}{k^2} \end{equation}
+\begin{equation} \nu_{\rm ib}({\mathbf r}) = \frac{1}{2V} \lim_{P\to\infty} \oint_{\partial\Omega(P)} {\mathbf r}\cdot d{\mathbf S}\, \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)\frac{1}{\left| {\mathbf x}\right|} \end{equation}
+To handle the last integral for a rectangular prism
+\section*{Acknowledgement}
+This work was supported by NSFC (Grant Nos. 22273047 and 21873037).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Supporting information}\label{sec:si}
+\renewcommand{\theequation}{S\arabic{equation}}  % ← key line
+\setcounter{equation}{0}                          % restart numbering
+This Supporting Information presents explicit evaluations of the two integrals over centro-symmetric domains: a general cuboid $\Omega(a,b,c)=[-a/2,a/2]\times[-b/2,b/2]\times[-c/2,c/2]$ and a cube $\Omega(a,a,a)=[-a/2,a/2]^3$. 
+These integrals are related to the infinite-domain boundary term and the quadrupolar correction by a multiplicative factor of $V=l_xl_yl_z$ (the volume of the unit cell).
+The results are as follows:
+\begin{multline} I_1({\mathbf r},a,b,c) =  \frac{1}{2}\int_{\Omega(a,b,c)} d{\mathbf x} \, \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^2\frac{1}{\left| {\mathbf x}\right|}  \\ = -4\sum_{\alpha=1}^3 ({\mathbf r}\cdot {\mathbf e}_\alpha)^2 {\rm atan}\frac{1}{\xi_\alpha^2\sqrt{\xi_1^2+\xi_2^2+\xi_3^2}}, \label{eq:ibsq} \end{multline}
+and
+\begin{multline} I_2({\mathbf r},a) = \frac{1}{24}\int_{[-a/2,a/2]^3} d{\mathbf x} \, \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^4\frac{1}{\left| {\mathbf x}\right|} \\ =  \frac{24r^4 - 40(x^4+y^4+z^4)}{9\sqrt{3} a^2},  \label{eq:i4} \end{multline}
+where ${\mathbf x}=(x_1,x_2,x_3)$ is the integration variable, ${\mathbf r}=(x,y,z)$ is a given vector, and $r^2=x^2+y^2+z^2$.
+In Eq.~\eqref{eq:ibsq}, ${\mathbf e}_1$, ${\mathbf e}_2$, and ${\mathbf e}_3$ denote the orthogonal unit vectors along the $x$, $y$, $z$ directions, respectively, so that ${\mathbf r}\cdot{\mathbf e}_1 = x$, etc. 
+The dimensionless parameters $\xi_\alpha$ characterize the shape of the cuboid and are defined by normalizing each side length with the geometric mean $(abc)^{1/3}$:
+\begin{equation}\xi_1 = \frac{a}{(abc)^{1/3}}; \quad \xi_2 = \frac{b}{(abc)^{1/3}};\quad \xi_3 = \frac{c}{(abc)^{1/3}}, \end{equation}
+which satisfy $\xi_1\xi_2\xi_3 = 1$. These parameters depend only on the relative proportions $a:b:c$, not the overall size of the cuboid.
+The function ${\rm atan}(\cdot)$ in Eq.~\eqref{eq:ibsq} denotes the inverse tangent (arctangent) and obeys the subtraction identity: 
+\begin{equation} {\rm atan}(A) - {\rm atan}(B) = {\rm atan}\frac{A-B}{1+AB}. \end{equation}
+
+One of the results ($I_1$) was previously obtained by Pan~\cite{Pan2017} and is closely related to Eq.(3.26) in the work by Smith\cite{Smith1981}; we have not found any evaluation of $I_2$ in the literature.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Preliminary Integrals}
+Before proceeding to the derivations, we list several preliminary definite integrals used throughout the evaluations, valid for $x, t, \tau >0$:
+\begin{equation} \int_0^x \frac{du\,\tau}{u^2+\tau^2} = {\rm atan}(x/\tau), \end{equation}
+%\begin{multline} \int_0^x \frac{du}{(u^2+t^2)\sqrt{u^2+t^2+\tau^2}} =\\ \frac{1}{t\tau}{\rm atan}\frac{\tau x}{t\sqrt{x^2+t^2+\tau^2}}, \label{eq:euler} \end{multline}
+\begin{equation} \int_0^x \frac{du\,(u^2+t^2)^{-1}}{\sqrt{u^2+t^2+\tau^2}} = \frac{1}{t\tau}{\rm atan}\frac{\tau x}{t\sqrt{x^2+t^2+\tau^2}}, \label{eq:euler} \end{equation}
+\begin{equation}\int_0^x \frac{du}{(u^2+\tau^2)^{3/2}} = \frac{x}{\tau^2 \sqrt{ \tau^2 + x^2 }},  \label{eq:i3} \end{equation}
+
+\begin{equation}\int_0^x \frac{du}{(u^2+\tau^2)^{5/2}} = \frac{3\tau^2x + 2x^3}{3\tau^4( \tau^2 + x^2 )^{3/2}}, \label{eq:i5}  \end{equation}
+\begin{equation}\int_0^x \frac{du}{(u^2+\tau^2)^{7/2}} = \frac{15\tau^4x + 20\tau^2x^3+8x^5}{15\tau^6( \tau^2 + x^2 )^{5/2}}, \label{eq:i7}  \end{equation}
+\begin{equation}\int_0^x \frac{du\, u^2}{(u^2+\tau^2)^{7/2}} = \frac{5\tau^2x^3 + 2x^5}{15\tau^4( \tau^2 + x^2 )^{5/2}}, \label{eq:i27}  \end{equation}
+\begin{multline}\int_0^x \frac{du\, (11+7u^2)}{(1+u^2)^3 (2+u^2)^{5/2}} =\\ \frac{x(2x^6+10x^4+17x^2+11)}{2(x^2+1)^2(x^2+2)^{3/2}} \label{eq:i35}. \end{multline}
+Eq.~\eqref{eq:euler} can be derived via the Euler substitution $w = u+\sqrt{u^2+t^2+\tau^2}$ which rationalizes the square root and reduces the integral to a standard arctangent form.
+Eqs.~\eqref{eq:i3} to~\eqref{eq:i35} were obtained via an ansatz method: assuming an antiderivative of the form $P(u)/Q(u)$, where $Q(u)$ matches the expected denominator structure, then determining the coefficients of the polynomial $P(u)$ by differentiation and matching.
+We also list a number of definite integrals involving the error function defined as
+\begin{equation} {\rm erf}(\tau) = \frac{2}{\sqrt{\pi}} \int_0^\tau du\, e^{-u^2}  \label{eq:erf}. \end{equation}
+\begin{equation} \int_{-\infty}^{\infty} du\,   e^{-tu^2}  \frac{\sin(u\tau)}{u} = \pi {\rm erf}\left(\frac{\tau}{2\sqrt{t}} \right),  \label{eq:esin} \end{equation}
+\begin{equation} \int_0^\infty du\, \frac{ {\rm erf}(u \tau)  u}{e^{u^2}} = \frac{1}{2} \frac{\tau}{\sqrt{1+\tau^2}}, \label{eq:ierf1} \end{equation}
+\begin{equation} \int_0^\infty du\, \frac{ {\rm erf}(ut){\rm erf}(u\tau) }{e^{u^2}}  =\\ \frac{1}{\sqrt{\pi}} {\rm atan}\frac{t\tau}{\sqrt{1+\tau^2+t^2}}, \label{eq:ierf2} \end{equation}
+\begin{equation} \int_{-\infty}^{\infty} du\,   e^{-tu^2} \sin(u\tau) u  = \frac{\sqrt{\pi} \tau }{2 \sqrt{t^3}} e^{-\tau^2/(4t)} \label{eq:uesin}. \end{equation}
+Eqs.~\eqref{eq:esin} to~\eqref{eq:ierf2} can be derived by parametric differentiation: differentiating with respect to $\tau$ yields simpler expressions, which are integrated and then antidifferentiated back to recover the full result.
+Eq.~\eqref{eq:uesin} follows from differentiating Eq.~\eqref{eq:esin} with respect to $t$.
+%Many of these integrals are documented in standard references such as Prudnikov {\it et al.}\cite{prudnikov1986}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Derivation of $I_1$ via the divergence theorem}
+To evaluate the volume integral in Eq.~\eqref{eq:ibsq}, we apply the divergence theorem (also known as Gauss's theorem). First, observe the identity
+%\begin{equation} \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^2\frac{1}{\left| {\mathbf x}\right|} = \nabla_{\mathbf x}\cdot \left[{\mathbf r} \left( {\mathbf r}\cdot \nabla_{\mathbf x}\frac{1}{\left| {\mathbf x}\right|}\right) \right] .  \end{equation}
+\begin{equation}\begin{aligned} \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^2\left| {\mathbf x}\right|^{-1} & = \nabla_{\mathbf x}\cdot \left[{\mathbf r} \left( {\mathbf r}\cdot \nabla_{\mathbf x}\left| {\mathbf x}\right|^{-1}\right) \right]  \\
+ & =- \nabla_{\mathbf x}\cdot \left[{\mathbf r} \left({\mathbf r}\cdot {\mathbf x}\right) \left|{\mathbf x} \right|^{-3} \right], \end{aligned} \end{equation}
+since $ \nabla_{\mathbf x}\left| {\mathbf x}\right|^{-1} = -{\mathbf x}/\left|{\mathbf x} \right|^3$.
+Using this identity, the volume integral can be transformed into a surface integral over the boundary $\partial\Omega(a,b,c)$ of the cuboid:
+\begin{equation} I_1 = -\frac{1}{2} \oint_{\partial\Omega(a,b,c)} {\mathbf r}\cdot{d\mathbf S} \, \frac{{\mathbf r}\cdot {\mathbf x}}{\left| {\mathbf x} \right|^3}, \label{eq:oint} \end{equation}
+where $d{\mathbf S}$ denotes an infinitesimal vector element of surface area, directed outward from the enclosed volume.
+
+The cuboid has six faces---three pairs of opposite rectangles lying in planes parallel to the $xy$, $yz$, and $zx$ coordinate planes, respectively. 
+Considering the face at $x_3 = +c/2$ whose outward normal is $+{\mathbf e}_3$. On this face, $d{\mathbf S}=dx_1 dx_2 {\mathbf e}_3$ and ${\mathbf x}=(x_1,x_2,c/2)$, so
+\begin{equation} {\mathbf r}\cdot d{\mathbf S} \left({\mathbf r}\cdot{\mathbf x}\right) =  dx_1 dx_2\, \left( xz\, x_1 + yz\, x_2 + z^2c/2 \right). \end{equation}
+Due to the even symmetry of the integration domain $[-a/2,a/2]\times[-b/2,b/2]$ in both $x_1$ and $x_2$, the terms linear in $x_1$ or $x_2$ integrate to zero. Only the term proportional to $z^2$ survives.
+On the opposite face at $x_3 = -c/2$, the outward normal is $-{\mathbf e}_3$, giving ${\mathbf r}\cdot d{\mathbf S} \left({\mathbf r}\cdot{\mathbf x}\right) =  dx_1 dx_2\, \left( -xz x_1 - yz x_2 + z^2c/2 \right)$ and again yielding a non-zero contribution only from the $z^2$ term upon integration.  
+Thus, the total contribution from the pair of faces ($x_3 = \pm c/2$) doubles the surviving quadratic term. Analogous reasoning applies to the other two pairs of faces. Hence, the full integral becomes
+\begin{equation} I_1  =  z^2 S_{xy} + x^2 S_{yz} + y^2 S_{zx} , \end{equation}
+where $S_{xy}$, $S_{yz}$, and $S_{zx}$ denote the coefficients of the quadratic terms contributed by the pair of faces parallel to the $xy$-, $yz$-, and $zx$-planes, respectively.
+Explicitly,
+\begin{equation} S_{xy} = \int_{-a/2}^{a/2} dx_1 \int_{-b/2}^{b/2} dx_2 \, \frac{-c/2}{\left( x_1^2 + x_2^2  + c^2/4\right)^{3/2}}.  \end{equation}
+Exploiting evenness in $x_1$ and $x_2$ and using the substitutions $u=2x_1$ and $v=2x_2$, we obtain
+\begin{equation} \begin{aligned}  S_{xy} &= -4 c \int_0^a du\int_0^b dv\, \frac{1}{ \left( u^2 + v^2  + c^2\right)^{3/2}} \\ &= -4 bc \int_0^a du\, \frac{1}{u^2+c^2}\frac{1}{\sqrt{u^2+b^2+c^2}}, \end{aligned} \end{equation}
+where the integration over $v$ is of the form in Eq.~\eqref{eq:i3}. Applying Eq.~\eqref{eq:euler} to the remaining integral yields
+\begin{equation} \begin{aligned} S_{xy} &= -4 {\rm atan}\frac{ab}{c\sqrt{a^2+b^2+c^2}} \\ & = -4 {\rm atan}\frac{1}{\xi_3^2\sqrt{\xi_1^2+\xi_2^2+\xi_3^2}}. \end{aligned} \end{equation}
+By symmetry, the other two pairs of faces contribute
+\begin{equation} S_{yz}=-4{\rm atan}\frac{1}{\xi_1^2\sqrt{\xi_1^2+\xi_2^2+\xi_3^2}}, \label{eq:syz} \end{equation}
+and
+\begin{equation} S_{zx}=-4{\rm atan}\frac{1}{\xi_2^2\sqrt{\xi_1^2+\xi_2^2+\xi_3^2}}, \end{equation}
+respectively. 
+Summing all contributions yields the desired result in Eq.~\eqref{eq:ibsq}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection {Derivation of $I_1$ via the Fourier transform}
+Instead of employing the divergence theorem, the integral
+\begin{equation} I_1({\mathbf r},2a,2b,2c) = \frac{1}{2}\int_{\Omega(2a,2b,2c)}d{\mathbf x} \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^2\frac{1}{\left| {\mathbf x}\right|} \end{equation}
+can be evaluated using Fourier transform techniques. Here, $\Omega(2a,2b,2c)=[-a,a]\times[-b,b]\times[-c,c]$ denotes a cuboid of side lengths $2a$, $2b$, and $2c$, which shares the same aspect ratio (i.e., shape) as $\Omega(a,b,c)$. 
+As shown below, the integration yields the same result as in Eq.~\eqref{eq:ibsq}. 
+We begin with the inverse Fourier transform:
+\begin{equation}  \frac{1}{\left| {\mathbf x} \right|} = \frac{1}{8\pi^3}\int_{{\mathbb R}^3} d{\mathbf k}\, e^{i{\mathbf k}\cdot{\mathbf x}} \frac{4\pi}{k^2}, \end{equation}
+where ${\mathbf k}=(k_1,k_2,k_3)$ and $k^2=\left| {\mathbf k} \right|^2=k_1^2+k_2^2+k_3^2$.
+Taking two derivatives gives
+\begin{equation}    \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^2\frac{1}{\left| {\mathbf x}\right|}   = -\frac{1}{2\pi^2} \int_{{\mathbb R}^3} d{\mathbf k}\, e^{i{\mathbf k}\cdot{\mathbf x}}  \frac{\left({\mathbf r}\cdot{\mathbf k}\right)^2}{k^2},         \end{equation}
+and then interchanging the order of integrations yields
+\begin{equation} I_1 = -\frac{1}{4\pi^2} \int_{{\mathbb R}^3} d{\mathbf k}\, \frac{\left({\mathbf r}\cdot{\mathbf k}\right)^2}{k^2} \left( \int_{\Omega(2a,2b,2c)}d{\mathbf x}\,  e^{i{\mathbf k}\cdot{\mathbf x}}   \right).  \label{eq:i1prime}  \end{equation}
+The inner integral factorizes:
+%\begin{equation} \int_{\Omega(a,b,c)}d{\mathbf x} \, e^{i{\mathbf k}\cdot{\mathbf x}} = 8 \frac{\sin(k_1a/2)}{k_1} \frac{\sin(k_2b/2)}{k_2} \frac{\sin(k_3c/2)}{k_3}. \end{equation}
+\begin{equation} \int_{\Omega(2a,2b,2c)}d{\mathbf x} \, e^{i{\mathbf k}\cdot{\mathbf x}} = 8 \frac{\sin(k_1a)}{k_1} \frac{\sin(k_2b)}{k_2} \frac{\sin(k_3c)}{k_3},  \label{eq:xcub} \end{equation}
+which is even in $k_1$, $k_2$ and $k_3$.
+To handle the $1/k^2$ term, we use the identity from a Gaussian integral:
+\begin{equation} \frac{1}{k^2} = \int_0^\infty dw\, e^{-k^2 w} = \int_0^\infty dw\, e^{-k_1^2 w} e^{-k_2^2 w} e^{-k_3^2 w}. \label{eq:igk2}  \end{equation}
+Substituting Eqs.~\eqref{eq:xcub} and~\eqref{eq:igk2} into Eq.~\eqref{eq:i1prime} allows us to write $I_1$ as a four-dimensional integral, three over $d{\mathbf k}=dk_1 dk_2 dk_3$ and one over $dw$. 
+Expanding $\left({\mathbf r}\cdot{\mathbf k}\right)^2 = x^2k_1^2 + y^2k_2^2 + z^2k_3^2 + \text{cross terms}$, we observe that all cross terms (e.g. $k_1k_2$) integrate to zero due to odd symmetry under $k_1 \to -k_1$ etc. Thus,
+\begin{equation} I_1 = x^2 C_x + y^2 C_y + z^2 C_z \label{eq:icxyz}, \end{equation}
+where each coefficient arises from integrating one quadratic component. The integrals over $d{\mathbf k}$ factorize and can be evaluated using Eqs~\eqref{eq:esin} and~\eqref{eq:uesin}. For example,  for the $x^2$-term:
+\begin{equation} C_x = \int_0^\infty \frac{dw\,  a}{\sqrt{w^3} }\frac{-\sqrt{\pi} }{e^{a^2/(4w)} }        {\rm erf}\left(\frac{b/2}{\sqrt{w}}\right)     {\rm erf}\left(\frac{c/2}{\sqrt{w}} \right) . \end{equation}
+Now applying the substitution $ 2\sqrt{w} = a/u $, so that
+\begin{equation} \frac{dw}{\sqrt{w^3}} = 4\frac{du}{a}; \quad \frac{a^2}{4w} = u^2;\quad \frac{b}{2\sqrt{w}} = \frac{b}{a} u;\quad \text{etc.} \end{equation}
+and
+\begin{equation} C_x = - 4 \int_0^\infty du\, e^{-u^2} {\rm erf}\left(u\frac{b}{a}\right) {\rm erf}(u\frac{c}{a}).  \label{eq:smith} \end{equation}
+Under this change of variables, the integral in $C_x$ now matches the form of Eq.~\eqref{eq:ierf2} with $t=b/a$ and $\tau = c/a$, giving the equality between $C_x$ and $S_{yz}$ of Eq.~\eqref{eq:syz}.
+%\begin{equation} C_x = -4 \, {\rm atan}\frac{bc}{a \sqrt{a^2+b^2+c^2}} = S_{yz}\end{equation}
+By symmetry, $C_y$ and $C_z$ are obtained analogously (e.g., exchanging $a$ and $b$ in $C_x$ gives $C_y$). Thus, Eq.~\eqref{eq:icxyz} recovers the result in Eq.~\eqref{eq:ibsq}.
+From Eqs.~\eqref{eq:i1prime},~\eqref{eq:igk2}, and the Dirichlet integral
+\begin{equation} \int_{-\infty}^\infty du\, \frac{\sin(u\tau)}{u}=\pi ;\quad \text{for}\quad \tau > 0 \end{equation} 
+it follows that the sum of the coefficients is shape-independent:
+\begin{equation} C_x + C_y + C_z = - 2\pi. \end{equation}
+
+Smith arrived at his Eq.(3.26) in Ref.\cite{Smith1981}, which equals the negative of Eq.~\eqref{eq:smith}. He wrote, ``in spite of some diligent work, no analytic progress has been made with (3.26).''
+The usual shape-dependent term is always non-negative\cite{DeLeeuw_Smith1980,Smith1981}. For a rectangular prism, the term is written as\cite{Smith1981}
+\begin{equation} J({\mathbf M}) = - \frac{1}{V} \left( C_x M_x^2 + C_y M_y^2 + C_z M_z^2 \right) ,\end{equation}
+where $V = l_x l_y l_z$ is the volume of the unit cell, and the dipole moment for a unit cell containing $N$ charges is defined as
+\begin{equation} {\mathbf M} = \left(M_x,M_y,M_z\right) = \sum_{j=1}^N q_j {\mathbf r}_j   \end{equation}
+The infinite boundary term $\nu_{\rm ib}(\mathbf r) = I_1({\mathbf r})/V$ is directly related to $J({\mathbf M})$ via\cite{Hu2014ib,Yi_Hu2017pairwise}
+\begin{equation} \sum_{i<j}^N q_iq_j \nu_{\rm ib}({\mathbf r}_i - {\mathbf r}_j) = J({\mathbf M}) - \frac{q_{\rm tot}}{V}\sum_{j=1}^N q_j |{\mathbf r}_j|^2 ,\end{equation}
+where $q_{\rm tot} = \sum_{j=1}^N q_j$ is the total charge. For a neutral system ($q_{\rm tot}=0$), the second term vanishes, and the pairwise sum reduces exactly to $J({\mathbf M})$. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Derivation of $I_2$ via the divergence theorem}
+To derive the integral
+\begin{equation} I_2({\mathbf r},a) = \frac{1}{24} \int_{\Omega(a,a,a)} d{\mathbf x} \, \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^4\frac{1}{\left| {\mathbf x}\right|}, \end{equation}
+we first rescale the coordinates via ${\mathbf x} \to {\mathbf x} a/2$, mapping the original cube onto the centro-symmetric domain $\Omega(2,2,2)=[-1,1]^3$ of side length 2.
+After scaling, the integral simplifies to
+\begin{equation} I_2({\mathbf r},a) = \frac{4}{a^2} I_2({\mathbf r},2) = \frac{1}{a^2} I_0({\mathbf r}), \end{equation}
+where 
+\begin{equation} I_0({\mathbf r}) = \frac{1}{6} \int_{\Omega(2,2,2)} d{\mathbf x} \, \left({\mathbf r}\cdot \nabla_{\mathbf x}\right)^4\frac{1}{\left| {\mathbf x}\right|}.  \end{equation}
+Below we derive the explicit form
+\begin{equation} I_0({\mathbf r}) = 4 \frac{ 6r^4 - 10(x^4+y^4+z^4) }{ 9 \sqrt{3} } . \label{eq:inti0}\end{equation}
+in analogy with the derivation of $I_1$, using the divergence theorem. 
+
+We employ the identity
+\begin{equation} \left( {\mathbf r}\cdot \nabla_{\mathbf x} \right)^4 \frac{1}{|{\mathbf x}|} = 3\nabla_{\mathbf x}\cdot \left[{\mathbf r}\left(\frac{3r^2({\mathbf r}\cdot{\mathbf x})}{|{\mathbf x}|^5} - \frac{5({\mathbf r}\cdot{\mathbf x})^3}{|{\mathbf x}|^7}\right)\right] ,\end{equation}
+and apply the divergence theorem to obtain
+\begin{equation} I_0 =  \frac{1}{2} \oint_{\partial\Omega(2,2,2)} {\mathbf r}\cdot d{\mathbf S}\, \left[ \frac{3r^2({\mathbf r}\cdot{\mathbf x})}{|{\mathbf x}|^5} - \frac{5({\mathbf r}\cdot{\mathbf x})^3}{|{\mathbf x}|^7} \right] .    \label{eq:oint2}      \end{equation}
+Consider the face at $x_3 = +1$ (normal $+{\mathbf e}_3$). On this face:
+\begin{equation} {\mathbf r}\cdot d{\mathbf S} = dx_1dx_2 \, z; \quad\quad {\mathbf x}=(x_1,x_2,+1), \end{equation}
+and the integration domain for $dx_1dx_2$ is the square $[-1,1]^2$, symmetric under $x_1 \to -x_1$ and $x_2 \to -x_2$.
+In the expansion of ${\mathbf r}\cdot {\mathbf x} = xx_1 +yx_2 + z$, terms odd in $x_1$ or $x_2$ vanish upon integration.
+Thus only the constant term $z$ survives in ${\mathbf r}\cdot {\mathbf x}$.
+For $\left( {\mathbf r}\cdot {\mathbf x}\right)^3$, we have
+\begin{equation} \left({\mathbf r}\cdot{\mathbf x}\right)^3 =  z^3 + 3z (x^2 x_1^2  + y^2 x_2^2 ) + \text{odd terms}. \end{equation}
+Furthermore, the square domain possesses exchange symmetry between $x_1$ and $x_2$. 
+Using this symmetry and $x^2+y^2=r^2-z^2$, the combination $x^2 x_1^2  + y^2 x_2^2$ may be replaced---upon integration---by $(r^2-z^2)x_2^2$ (or equivalently by $(r^2-z^2)x_1^2$).
+Thus, up to terms that integrate to zero,
+\begin{equation} \left({\mathbf r}\cdot{\mathbf x}\right)^3  \to z^3 + 3z \left(r^2-z^2\right) x_2^2 .\end{equation}
+By symmetry, the contributions from opposite faces are equal. 
+Summing the contributions from all six faces, we write
+\begin{equation} I_0 =  D_{xy} + D_{yz} + D_{zx}, \label{eq:i0d} \end{equation}
+where, for instance, $D_{xy}$ denotes the combined contribution of the two faces parallel to the $xy$-plane ($x_3=\pm 1$).
+Explicitly, 
+\begin{equation} D_{xy} = 4r^2z^2 \left(J_5 - K_2\right) -  4z^4\left( J_7 -  K_2 \right)  , \label{eq:dc} \end{equation}
+with the auxiliary integrals
+\begin{equation} J_5 = \int_0^1 dx_1\int_0^1dx_2\,\frac{3}{\left(x_1^2 + x_2^2 + 1\right)^{5/2}}, \end{equation}
+\begin{equation} J_7 = \int_0^1 dx_1\int_0^1dx_2\,\frac{5}{\left(x_1^2 + x_2^2 + 1\right)^{7/2}}, \end{equation}
+and 
+\begin{equation} K_2 = \int_0^1 dx_1\int_0^1dx_2\,\frac{15 x_2^2}{\left(x_1^2 + x_2^2 + 1\right)^{7/2}}. \end{equation}
+The factor of $4$ in Eq.~\eqref{eq:dc} arises from exploiting evenness in $x_1$ and $x_2$ to restrict the double integral to the quadrant $[0,1]^2$.
+
+Carrying out the integration over $x_2$ (see Eqs.~\eqref{eq:i5} to~\eqref{eq:i27}) yields
+\begin{equation} J_5-K_2 = \int_0^1 dx_1\, \frac{3}{\left(2 + x_1^2 \right)^{5/2}} = \frac{2}{3\sqrt{3}}, \end{equation}
+and
+\begin{equation}J_7-K_2 = \int_0^1 dx_1\, \frac{22+14x_1^2}{3(1+x_1^2)^3 (2+x_1^2)^{5/2} } = \frac{10}{9\sqrt{3}}, \end{equation}
+where Eq.~\eqref{eq:i7} and~\eqref{eq:i35} have been used. 
+Substituting into Eq.~\eqref{eq:dc} gives
+\begin{equation} D_{xy} = \frac{24 r^2 z^2 - 40 z^4}{9\sqrt{3}}, \end{equation}
+and cyclic permutation yields
+\begin{equation} D_{yz} = \frac{24 r^2 x^2 - 40 x^4}{9\sqrt{3}};\quad  D_{zx} = \frac{24 r^2 y^2 - 40 y^4}{9\sqrt{3}} , \end{equation}
+Substituting these results into Eq.~\eqref{eq:i0d} yields the expression stated in Eq.~\eqref{eq:inti0}, completing the derivation.
+Finally, using $r^4 = x^4 + y^4 + z^4 + 2(x^2 y^2 + y^2 z^2 + z^2 x^2)$, the result may be expressed as a linear combination of quadrupolar invariants:
+\begin{equation} I_0 = \frac{ 48\left( x^2 y^2 + y^2 z^2 + z^2 x^2\right) - 16\left( x^4 + y^4 + z^4 \right) }{9\sqrt{3}}. \end{equation}
+For a general cuboid domain, the same structural form holds, with coefficients given by analogous double integrals; however, their explicit evaluation lies beyond the scope of this work.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\bibliography{refsall}
+\end{document}
