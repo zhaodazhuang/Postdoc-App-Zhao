@@ -1,0 +1,414 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage {subcaption}
+\usepackage{float}
+\usepackage{multirow} %表格
+\usepackage{siunitx} %SI单位
+\usepackage{makecell} %表格里一对二
+\usepackage{booktabs} % 三线表：\toprule, \midrule, \bottomrule
+\usepackage[flushleft]{threeparttable}
+\usepackage[hidelinks]{hyperref}
+\title{Notes: A Water Model with an Explicit Electron Density: from X-ray and DFT to ML and Surface Potential }
+\author{Zhao Yihao \\ \textit{zhaoyihao@protonmail.com}}
+\date{July 22, 2024}
+\begin{document}
+	\maketitle
+	
+	\section{Theoretical Basis of X-ray Scattering and Atomic Form Factors}
+	
+	The X-ray scattering amplitude reflects the overall distribution of electrons within the system; that is,
+	\begin{equation}
+		I(\mathbf{k}) = \dfrac{1}{M}\langle |\hat{\rho}(\mathbf{k}, \bar{\mathbf{R}})|^2\rangle \label{eq:ixray},
+	\end{equation}
+	where $M$ is the number of molecules,  $\bar{\mathbf{R}}$ denotes the set of nuclear coordinates, and $\rho_e(\mathbf{r})$ represents the total electron density distribution of the system. It can therefore be expanded as:
+	\begin{align}
+        I(\mathbf{k}) =& \dfrac{1}{M}\bigg\langle  \bigg|
+         \int_{-\infty}^{\infty} d\mathbf{r}\, e^{i\mathbf{k} \cdot \mathbf{r}} 
+         \rho_e(\mathbf{r}) 
+         \bigg|^2\bigg\rangle  \notag \\
+        =& \dfrac{1}{M}\bigg\langle  \bigg|
+        \int_{-\infty}^{\infty} d\mathbf{r}\, e^{i\mathbf{k} \cdot \mathbf{r}} 
+         \sum_{i=1}^N \delta(\mathbf{r} - \mathbf{R}_i)\star \rho_e^i(\mathbf{r}) 
+        \bigg|^2\bigg\rangle 
+	\end{align}
+    Applying the convolution theorem,
+    \begin{align}
+    	 I(\mathbf{k}) = \dfrac{1}{M}\bigg\langle  \bigg|
+    	 \sum_{i=1}^N e^{i\mathbf{k}\cdot \mathbf{R}_i}  \mathscr{F}[\rho_e^i](\mathbf{k})
+    	 \bigg|^2\bigg\rangle 
+    \end{align}
+    Although the electron cloud distribution of identical atoms in the same molecule may vary slightly due to their local environments, a key approximation can be made: these distributions are assumed to be identical. This allows the Fourier transforms of the electron density to be factored out of the ensemble average. For a pure water system, this leads to:
+    \begin{align}
+    	I(\mathbf{k}) =& \; S_{{\text{OO}}}(\mathbf{k}) \cdot |\mathscr{F}[\rho_{\text{O}}]|^2 \notag \\
+    	+& 2S_{{\text{OH}}}(\mathbf{k}) \cdot \mathscr{F}[\rho_{\text{O}}] \mathscr{F}[\rho_{\text{H}}] 
+    	+ S_{{\text{HH}}}(\mathbf{k}) \cdot |\mathscr{F}[\rho_{\text{H}}]|^2,
+    \end{align}
+    where the structure factors are defined as:
+    \begin{align}
+    	S_{{\text{OO}}}(\mathbf{k}) &= \dfrac{1}{M} \bigg\langle \bigg| \sum_{i \in{\text{O}}} e^{i\mathbf{k}\cdot \mathbf{R}_i} \bigg|^2 \bigg\rangle, \\
+    	S_{{\text{OH}}}(\mathbf{k}) &= \dfrac{1}{2M}  \bigg\langle \sum_{i\in {\text{O}}} \sum_{j\in {\text{H}}}( e^{i\mathbf{k}\cdot( \mathbf{R}_{i}  - \mathbf{R}_j) } +  e^{i\mathbf{k}\cdot( \mathbf{R}_{j}  - \mathbf{R}_i) } )\bigg\rangle ,\\
+    	S_{{\text{HH}}}(\mathbf{k}) &= \dfrac{1}{M} \bigg\langle \bigg| \sum_{i \in {\text{H}}} e^{i\mathbf{k}\cdot \mathbf{R}_i} \bigg|^2 \bigg\rangle.
+    \end{align}
+    The Fourier transform of a single atom's electron density is termed its atomic form factor:
+    \begin{equation}
+    	f_{\text{O}}(\mathbf{k}) = \mathscr{F}[\rho_{\text{O}}], \quad f_{\text{H}}(\mathbf{k}) = \mathscr{F}[\rho_{\text{H}}].
+    \end{equation}
+    It is commonly assumed that the electron cloud is spherically symmetric, implying that the form factor depends only on the magnitude of the wave vector: $f(\mathbf{k}) = f(k)$. Consequently, the X-ray scattering intensity for water can be compactly expressed as a function of these radially symmetric form factors and the partial structure factors:
+    \begin{align}
+    	I(\mathbf{k}) =& \; S_{\text{OO}}(\mathbf{k}) \cdot f_{\text{O}}^2(k) \notag \\
+    	&+ 2S_{\text{OH}}(\mathbf{k}) \cdot f_{\text{O}}(k) f_{\text{H}}(k) + S_{\text{HH}}(\mathbf{k}) \cdot f_{\text{H}}^2(k).
+    \end{align}
+    \par\vspace{\baselineskip}
+    
+    This formula encounters different problems depending on the context in which it is applied.
+    
+    \textbf{First, the problem of attributing electron density in \textit{ab initio} calculations.} In molecular dynamics-based quantum chemical calculations, the atomic configurations of the system (i.e., $\bar{\mathbf{R}}$) are known. Therefore, the partial structure factors $S_{\text{OO}}(k)$, $S_{\text{OH}}(k)$, and $S_{\text{HH}}(k)$ can be directly calculated from the trajectories. At this point, the \textbf{only two unknowns} in the scattering intensity formula are the atomic form factors $f_{\text{O}}(k)$ and $f_{\text{H}}(k)$. Although a single equation contains two unknowns, the fact that the amplitude of the hydrogen form factor is much smaller than that of oxygen ($|f_{\text{H}}(k)| \ll |f_{\text{O}}(k)|$) allows for the simultaneous high-precision determination of both $f_{\text{O}}(k)$ and $f_{\text{H}}(k)$ under reasonable approximations. The resulting bulk water electron density distribution $\rho_e(\mathbf{r})$ not only accurately describes the electron distribution but also possesses a clear atomic attribution (i.e., it can be decomposed into contributions from $f_{\text{O}}$ and $f_{\text{H}}$). This attributed, precise electron density distribution serves two main purposes: on one hand, it can be used to correct the surface potential of classical water models; on the other hand, it provides a foundation for the rigorous separation of long-- and short-range electrostatic interactions in machine learning \textit{ab initio} datasets.
+    
+    \textbf{Second, the problem of resolving microscopic structure based on experimental measurement data.} In experiments, $I(k)$ is the directly measurable quantity. To extract microscopic structural information about water (e.g., the oxygen-oxygen radial distribution function $g_{\text{OO}}(r)$) from $I(k)$, one must first obtain the partial structure factors $S_{\alpha\beta}(k)$. This necessitates introducing form factors into the formula. The closer the form factor is to the true physical situation, the more accurate the inversely solved $S_{\text{OO}}(k)$ will be, and consequently, the more precise the $g_{\text{OO}}(r)$ obtained via inverse Fourier transform. This is the standard practice for experimentally determining the RDF of water.
+    
+    
+    \par\vspace{\baselineskip}
+    
+    \section{Obtaining Atom-Attributed Electron Density from Ab Initio Calculations}
+    
+    The simplest and most direct source for the form factor is the electron density of an isolated, ground-state, spherically symmetric atom. This is known as the Independent Atom Model (IAM). We denote the IAM form factors for the water molecule as $f_{\mathrm{H},0}$ and $f_{\mathrm{O},0}$, respectively. In particular, for an isolated hydrogen atom, we can directly utilize the analytic solution to its Schrödinger equation:
+    \begin{equation}
+    	\rho_{\mathrm{H},0}(\mathbf{r}) = \frac{1}{\pi a_0^3} e^{ -\frac{2 r}{a_0} } ,
+    \end{equation}
+    where $a_0 \approx 0.529\,\si{\angstrom}$ is the Bohr radius. Its corresponding form factor is obtained via the Fourier transform:
+    \begin{equation}
+    	f_{\mathrm{H},0}(k) = \mathscr{F}[\rho_{\mathrm{H},0}](k) = \dfrac{16}{(k^2a_0^2 + 4)^2}.
+    \end{equation}
+    
+    For atoms with higher atomic numbers, although an analytical expression may not be available, the atomic form factors can be accurately represented by a six-Gaussian function fit to \textit{ab initio} data. As proposed by Zhengwei Su and Philip Coppens in 1997 \cite{Su1998}, the functional form is:
+    \begin{equation}
+    	f_{\mathrm{X},0}(k) = \sum_{j=1}^{6} a_j e^{-b_jk^2/(8\pi)^2},
+    	\label{eq:6gaussian_form}
+    \end{equation}
+    where the index $\mathrm{X}$ denotes the atomic species. For oxygen and hydrogen, the fitted parameters $a_j$ and $b_j$ are listed in Table \ref{tab:six_gaussian_params}.
+    
+    \begin{table}[h]
+  	\centering    		
+  	\begin{threeparttable} 
+  		\centering
+  		\caption{Parameters for the six-Gaussian fit of the e where $Z_{\rm O}=8$ for oxygen and $Z_{\rm H}=1$ for hydrogen are the atomic numbers. $a_j$ and $b_j$ are the coefficients and variance of the Gaussians for an isolated $X$-atom \cite{Su1998}.}
+  		\label{tab:six_gaussian_params}
+  		\begin{tabular}{ccccccc}
+  			\toprule
+  			\multirow{2}{*}{X}  & $a_1$ & $a_2$ & $a_3$ & $a_4$ & $a_5$ & $a_6$ \\
+  			& $b_1$ & $b_2$ & $b_3$ & $b_4$ & $b_5$ & $b_6$ \\
+  			\midrule
+  			\multirow{2}{*}{H}  & 0.43028 & 0.28537 & 0.17134 & 0.09451 & 0.01725 & 0.00114 \\
+  			& 23.02312 & 10.20138 & 51.25444 & 4.13511 & 1.35427 & 0.24269 \\
+  			\midrule
+  			\multirow{2}{*}{O}  & 2.34752 & 1.83006 & 1.61528 & 1.52402 & 0.41423 & 0.26867 \\
+  			& 9.6971 & 18.59876 & 5.19879 & 0.32408 & 39.79099 & 0.0115\\
+  			\bottomrule
+  		\end{tabular}
+  	\end{threeparttable}
+  	\end{table}
+ 
+    \subsection{Limitations of IAM and the MAFF Model}
+  	
+    However, the IAM does not account for effects such as chemical bonding, dielectric environment, and the resulting distortion of electron cloud distributions. To address these limitations, Sorenson \textit{et al.} proposed the Modified Atomic Form Factor (MAFF). We denote the MAFF for hydrogen and oxygen as $f_{\mathrm{H},1}$ and $f_{\mathrm{O},1}$, respectively.
+    
+    These modified form factors are obtained by transforming the IAM form factors with a charge transfer parameter $q$, which quantifies the amount of electron density transferred from each hydrogen atom to oxygen during bond formation. The specific transformations are given by:
+    \begin{align}
+    	f_{\mathrm{H},1}(k) &= f_{\mathrm{H},0}(k) \bigg[ 1 - \frac{q}{Z_{\mathrm{H}}} 
+    	e^{-\frac{k^2\sigma^2}{4}} \bigg], \label{eq:MAFF_H} \\
+    	f_{\mathrm{O},1}(k) &= f_{\mathrm{O},0}(k) \bigg[ 1 + \frac{2q}{Z_{\mathrm{O}}} 
+    	e^{-\frac{k^2\sigma^2}{4}} \bigg], \label{eq:MAFF_O}
+    \end{align}
+    where $Z_{\mathrm{H}} = 1$ and $Z_{\mathrm{O}} = 8$ are the atomic numbers of hydrogen and oxygen, respectively, and $\sigma$ is a width parameter characterizing the spatial extent of the charge transfer.
+    
+    The parameter $q$ directly determines the dipole moment $\mu$ of the water molecule in the MAFF model:
+    \begin{equation}
+    	\mu = |2q ( \mathbf{r}_{\mathrm{OH}_1} + \mathbf{r}_{\mathrm{OH}_2} )|,
+    	\label{eq:MAFF_dipole}
+    \end{equation}
+    where $\mathbf{r}_{\mathrm{OH}_1}$ and $\mathbf{r}_{\mathrm{OH}_2}$ are the displacement vectors from the oxygen atom to the first and second hydrogen atoms, respectively. 
+
+    \par\vspace{\baselineskip}
+    Since the form factor corresponds to a real-space electron density distribution with definite physical meaning, the density must be non-negative everywhere. The MAFF model, however, does not guarantee this fundamental requirement. We can demonstrate this explicitly by deriving the real-space density $\rho_{\mathrm{H},1}(r)$ from the MAFF form factor:    
+    \begin{align}
+    	\rho_{\text{H},1}(r) =& \mathscr{F}^{-1}[f_{\text{H,0}}]  - \mathscr{F}^{-1}\bigg[f_{\text{H},0}\dfrac{q}{Z_{\text{H}}} e^{-\frac{k^2\sigma^2}{4}} \bigg] \notag \\
+    	=& \rho_{\text{H},0}  - \dfrac{q}{Z_{\text{H}}a_0^4} \dfrac{16}{(2\pi)^3} I
+    \end{align}
+    with
+    \begin{align}
+    	I =& \int_{-\infty}^{\infty} d \mathbf{k} \, 
+    	\dfrac{e^{i\mathbf{k}\cdot \mathbf{r}} }{ (k^2 + (2/a_0)^2)^2 } e^{-k^2\sigma^2/4} \notag \\
+    	=&  2\pi \int_{0}^{\infty} d k \, 
+    	\dfrac{k^2}{ (k^2 + (2/a_0)^2)^2 } e^{-k^2\sigma^2/4} \int_{0}^{\pi} d\theta \, \sin(\theta) e^{ikr \cos(\theta)}  \notag \\
+    	=& \dfrac{4\pi}{r} G ,
+    \end{align}
+    defining $\beta = 2/a_0$ and  $\alpha = \sigma^2/4$
+    \begin{equation}
+    	G = \int_{0}^{\infty} d k \, 
+    	\dfrac{k \sin(kr)}{ (k^2 + \beta^2)^2 } e^{-\alpha k^2}  
+    \end{equation}
+    
+    The integral for $G$ can be evaluated starting from a fundamental integral proven during my derivation of the 2D Ewald summation (see Appendix of my thesis):
+    \begin{align}
+   	F =  &\int_{0}^{\infty} dk \, \dfrac{\cos(kr)}{k^2 + \beta^2 } e^{-\alpha k^2}  \notag \\
+    =&  \dfrac{\pi}{4\beta} e^{\beta^2 \alpha} \bigg[ e^{\beta r}  \text{erfc}\bigg(\beta \sqrt{\alpha} + \dfrac{r}{2\sqrt{\alpha}} \bigg)
+    +  e^{-\beta r}  \text{erfc}\bigg(\beta \sqrt{\alpha} - \dfrac{r}{2\sqrt{\alpha}} \bigg) \bigg]
+    \end{align}
+    Observe that:
+    \begin{equation}
+    \dfrac{\partial F}{ \partial \beta} = -2\beta \int_{0}^{\infty}  dk \, \dfrac{\cos(kr)}{(k^2 + \beta^2)^2 } e^{-\alpha k^2} .
+    \end{equation}
+    Furthermore,
+    \begin{align}
+    	\dfrac{\partial }{\partial r} \bigg[ (\dfrac{-1}{2\beta}) \dfrac{\partial F}{ \partial \beta}\bigg] = -\int_{0}^{\infty}  dk \, \dfrac{k \sin(kr)}{(k^2 + \beta^2)^2 } e^{-\alpha k^2} .
+    \end{align}
+    Consequently,
+    \begin{equation}
+       G = \dfrac{1}{2\beta}\dfrac{\partial^2 F }{\partial r \partial \beta}, 
+    \end{equation}
+    Substitute the error function form of $F$ into the above equation :
+    \begin{align}
+    	\dfrac{\partial F}{\partial \beta} =& \dfrac{\pi}{4} e^{\beta^2 \alpha} \bigg[  \bigg(2\alpha - \dfrac{1}{\beta^2} + \dfrac{r}{\beta} \bigg)   e^{\beta r} \text{erfc}\bigg(\beta\sqrt{\alpha} + \dfrac{r}{2\sqrt{\alpha}} \bigg) \notag \\ 
+    	+& \bigg(2\alpha - \dfrac{1}{\beta^2} - \dfrac{r}{\beta} \bigg)   e^{-\beta r} \text{erfc}\bigg(\beta\sqrt{\alpha} - \dfrac{r}{2\sqrt{\alpha}}  \bigg) - \dfrac{4}{\beta}\dfrac{\sqrt{\alpha}}{\sqrt{\pi}} e^{-\beta^2\alpha - r^2/(4\alpha)} \bigg]
+    \end{align}
+    Subsequently,
+    \begin{align}
+    	\dfrac{\partial^2 F}{\partial \beta \partial r}  = \dfrac{\pi}{4} e^{\beta^2 \alpha} \bigg[ & (2\alpha \beta + r) e^{\beta r} \text{erfc}\bigg(\beta\sqrt{\alpha} + \dfrac{r}{2\sqrt{\alpha}} \bigg)
+    	\notag \\
+    	- & (2\alpha \beta - r) e^{-\beta r} \text{erfc}\bigg(\beta\sqrt{\alpha} - \dfrac{r}{2\sqrt{\alpha}}  \bigg)  \bigg] .
+    \end{align}
+    Thus, we obtain $G$ by substituting $\beta = 2/a_0$ and $\alpha = \sigma^2/4$ back into the expression:
+    \begin{align}
+    	G =  \dfrac{\pi a_0}{16} e^{\tfrac{\sigma^2}{a_0^2}} \bigg[ & \bigg(\dfrac{\sigma^2}{a_0} + r\bigg) e^{\tfrac{2r}{a_0}} \text{erfc}\bigg(\dfrac{\sigma}{a_0} + \dfrac{r}{\sigma} \bigg)
+    	\notag \\
+    	- & \bigg(\dfrac{\sigma^2}{a_0} - r\bigg) e^{-\tfrac{2r}{a_0}} \text{erfc}\bigg(\dfrac{\sigma}{a_0} - \dfrac{r}{\sigma}  \bigg)  \bigg] .
+    \end{align}
+    Finally, 
+     \begin{align}
+    	\rho_{\text{H},1}(r) 
+    	= \rho_{\text{H},0}  - \dfrac{q}{Z_{\text{H}}} \dfrac{1}{\pi a_0^3}\dfrac{1}{2r}  e^{\tfrac{\sigma^2}{a_0^2}} \bigg[ & \bigg(\dfrac{\sigma^2}{a_0} + r\bigg) e^{\tfrac{2r}{a_0}} \text{erfc}\bigg(\dfrac{\sigma}{a_0} + \dfrac{r}{\sigma} \bigg)
+    	\notag \\
+    	- & \bigg(\dfrac{\sigma^2}{a_0} - r\bigg) e^{-\tfrac{2r}{a_0}} \text{erfc}\bigg(\dfrac{\sigma}{a_0} - \dfrac{r}{\sigma}  \bigg)  \bigg] .
+    \end{align}
+    
+    \begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{./figure/fig1.pdf}
+	\caption{Radial electron density distribution $\rho_{\mathrm{H},1}(r)$ from the MAFF model. The shaded region highlights the unphysical negative density values.}
+	\label{fig:fig1}
+    \end{figure}
+    
+    
+    \par\medskip
+    Figure \ref{fig:fig1} shows the radial electron density distribution $\rho_{\mathrm{H},1}(r)$ computed using the MAFF parameters quoted in the original literature: $q = 0.5$ and $\sigma = \sqrt{2}/2\,\si{\angstrom}$. As clearly demonstrated, $\rho_{\mathrm{H},1}(r)$ attains negative values for $r \gtrsim 2.3\,a_0$ (shaded region). Such an electron density distribution is unphysical. To overcome this fundamental flaw, a modified electron density model that guarantees positivity is required.
+    
+    \subsection{A New Form Factor Model}
+    
+    To address this flaw, we propose a new form factor model that modifies only the hydrogen electron density distribution:
+    
+    \begin{equation}
+    	\rho_{\mathrm{H},2}(r) = \dfrac{1-q}{Z_{\text{H}}} \dfrac{\alpha^3}{8\pi} e^{-\alpha r},
+    	\label{eq:new_H_density}
+    \end{equation}    
+    where $q$ remains the transferred charge, and the remaining charge is distributed as $e^{-\alpha r}$, which guarantees non-negativity. The factor $\alpha^3/(8\pi)$ is a normalization constant. The parameter $\alpha$ regulates the distribution profile. When $\alpha = 5.0$, the distribution is shown as the black line in Fig.~\ref{fig:fig1}.    
+    The corresponding form factor $f_{\mathrm{H},2}(k)$ is obtained via Fourier transform:
+    \begin{equation}
+    	f_{\text{H}, 2}(k) = \dfrac{1-q}{Z_{\text{H}}} \dfrac{\alpha^4}{(k^2+\alpha^2)^2}
+    \end{equation}
+    \par\medskip
+    
+    \subsection{Parameter Determination and Physical Constraints}
+    \label{subsec:parameter_determination}
+    
+    Both the MAFF model and our new model introduce human-chosen parameters, which is necessary to correct the deviation of the IAM's physical picture from reality. Among these parameters, the charge transfer $q$ has clear physical constraints and can be obtained from the average molecular dipole moment and geometry:
+    \begin{align}
+    	q = \dfrac{\langle \mu \rangle }{2\sqrt{\langle d_{\rm OH}\rangle^2-\langle d_{\rm HH}\rangle^2/4}}.
+    \end{align}
+    In contrast, the physical constraints on $\sigma$ and $\alpha$ are ambiguous. However, in \textit{ab initio} calculations, the spectral data and the structure factors $S_{XX}(k)$ are known. Therefore, these parameters can be determined by minimizing the difference between the model X-ray spectrum and the \textit{ab initio} X-ray spectrum:
+    \begin{equation}
+    	{\rm Error}(\theta) = \int dk \, \left[ I_{\text{model}}(k; \theta) - I_{\textit{ab initio}}(k) \right]^2, \quad
+    	\theta = \theta \bigg|_{\partial {\rm Error}/\partial \theta = 0}.
+    \end{equation}
+    
+    In addition to optimizing parameters via scattering spectra, the spatial distribution characteristics of the molecular electron cloud provide an independent means of physical validation. The spatial extent of a molecule's electron cloud is quantified by its total variance, $\langle \rho_{e}^{tot}(\mathbf{r}) r^2 \rangle$. For models where the electron density is partitioned into spherical atomic contributions, this total variance can be rigorously decomposed into two physically distinct components: the intra-atomic spread variance $\mathcal{R}_{\mathrm{s}}^2$ and the geometric center variance $\mathcal{R}_{\mathrm{c}}^2$. 
+    
+    The geometric variance, $\mathcal{R}_{\mathrm{c}}^2$, originates from the spatial arrangement of the atomic centers. It is computed by treating the entire electron cloud associated with each atom as a point charge located at its nucleus (with weight $Z_\alpha + q_\alpha$) and evaluating the variance of these point charges relative to the molecular center of negative charge. Consequently, $\mathcal{R}_{\mathrm{c}}^2$ depends solely on the molecular geometry—specifically the bond lengths $d_{\mathrm{OH}}$ and $d_{\mathrm{HH}}$—and the amount of charge transfer $q$:
+    \begin{equation}
+    	\mathcal{R}_{\mathrm{c}}^2 = \frac{(4-3q-q^2)(4d_{\mathrm{OH}}^2-d_{\mathrm{HH}}^2)}{10} + (1-q)\frac{d_{\mathrm{HH}}^2}{2}.
+    	\label{eq:Rc_physical}
+    \end{equation}
+    
+    In contrast, the intra-atomic spread variance, $\mathcal{R}_{\mathrm{s}}^2$, captures the innate diffuseness of the electron cloud \textit{around each atomic nucleus}. It is defined as the weighted sum of the variances of the three spherical atomic densities relative to their own centers, irrespective of atomic positions. This term reflects how chemical bonding modifies the compactness of the atomic orbitals. The total variance of the molecular electron cloud is then the sum of these two independent contributions:
+    \begin{equation}
+    	\langle \rho_{e}^{\text{tot}}(\mathbf{r}) r^2 \rangle = \mathcal{R}_{\mathrm{s}}^2 + \mathcal{R}_{\mathrm{c}}^2.
+    \end{equation}
+    
+    The connection between the form factor $f_{\text{X}}(k)$ and the atomic variance $\mathcal{R}_{\text{X}}^2$ follows from the properties of the Fourier transform. For a spherically symmetric electron density $\rho_e(r)$:
+    \begin{equation}
+   	\dfrac{\partial^2 f_{\text{X}}(\mathbf{k})}{\partial k^2} = - \int_{-\infty}^{\infty} d\mathbf{r} \,  r^2 \rho_e(r) e^{i\mathbf{k}\cdot \mathbf{r}}.
+    \end{equation}
+    At $k=0$, this gives two fundamental relations:
+    \begin{equation} 
+   	- \dfrac{\partial^2 f_{\text{X}}(\mathbf{k})}{\partial k^2} \bigg|_{k=0} = \mathcal{R}_{\text{X}}^2, \quad
+   	f_{\text{X}}(\mathbf{k}) \bigg|_{k=0} = Z_{\text{X}},
+    \end{equation}
+    where $\mathcal{R}_{\text{X}}^2$ is the variance of atom X's electron distribution, and $Z_{\text{X}}$ is its atomic number.
+    
+    In our new model ($f_{\mathrm{H},2}+f_{\mathrm{O},1}$), the intra-atomic variance takes the form
+    \begin{equation}
+    	\mathcal{R}_{\mathrm{s}}^2 = 
+    	(1+\dfrac{2q}{Z_O})R_{\text{O},0}^2 + q \sigma^2 + 2 \dfrac{1-q}{Z_{\text{H}}}\dfrac{4}{\alpha^2},
+    	\label{eq:Rs_new}
+    \end{equation}
+    where the parameter $\alpha$ explicitly controls the contraction of the hydrogen electron cloud. The MAFF model, however, yields
+    \begin{equation}
+    	\mathcal{R}_{\mathrm{s}}^2 =  (1+\dfrac{2q}{Z_{\text{O}}})\mathcal{R}_{\mathrm{O},0}^2 + 2(1-\dfrac{q}{Z_{\text{H}}})\mathcal{R}_{\mathrm{H},0}^2,
+    	\label{eq:Rs_MAFF}
+    \end{equation}
+    which lacks an adjustable parameter to describe orbital contraction, thereby directly coupling the spread variance to the charge transfer $q$.
+    
+    
+    \subsubsection{Water in Gas-Phase}
+    \label{subsec:gas_phase}
+    
+    First, we consider an isolated water molecule, which represents the gas-phase limit. The benchmark X-ray scattering signal $I_{\textit{ab initio}}(k)$ is computed via direct Fourier transform of the molecular electron density obtained from quantum chemistry calculations, as defined in eq(\ref{eq:ixray}). Our computation is performed at the PBE0/def2-TZVPD level using the BDF software \cite{BDF2020} for a monomer with experimental bond lengths $d_{\rm OH} = 0.9753\,\si{\angstrom}$ and $d_{\rm HH} = 1.559\,\si{\angstrom}$ \cite{Benedict1956,Shibata1965,Narten_Levy1971}. The calculated dipole moment of $1.8486$\,Debye closely matches the experimental value of $1.8546$\,Debye \cite{Clough1973}.
+    
+    Alternatively, assuming that the electron density of the rigid molecule is a sum of spherical atomic densities, the scattering intensity for an isolated molecule can be computed via the Debye formula \cite{DebyeXX,Narten_Levy1971}:
+    \begin{equation} 
+    	I(k) = f_{\rm O}^2(k) + 2f_{\rm H}^2(k) + 4f_{\rm O}(k)f_{\rm H}(k) \frac{\sin(kd_{\rm OH})}{kd_{\rm OH}} + 2f_{\rm H}^2(k) \frac{\sin(kd_{\rm HH})}{kd_{\rm HH}},
+    	\label{eq:Debye_gas}
+    \end{equation}
+    where $f_{\rm O}(k)$ and $f_{\rm H}(k)$ are the $k$-dependent form factors defined in any of the models discussed above.
+    
+    Following the gradient-based optimization procedure described in Section~\ref{subsec:parameter_determination}, we obtain the optimal parameters for each model by minimizing the difference between the model prediction and the benchmark $I_{\textit{ab initio}}(k)$. 
+    
+    \begin{figure}[h]
+    	\centering
+    	\includegraphics[width=0.5\textwidth]{./figure/fig2.pdf}
+    	\caption{Comparison of X-ray scattering intensities for gas-phase water: benchmark DFT result (black solid line), IAM (gray dashed), MAFF with suggested $\sigma$ (orange dashed), MAFF with optimized $\sigma$ (green dashed), and the new model with optimized parameters (blue solid).}
+    	\label{fig:fig2}
+    \end{figure}
+    
+    Figure~\ref{fig:fig2} compares the scattering intensities computed from different models with their respective optimized parameters. Notable differences around $k \approx 2\,\si{\angstrom}^{-1}$ are observed between the benchmark $I_{\textit{ab initio}}(k)$ and the result from the parameter-free Independent Atom Model ($f_{\rm H,0}$ and $f_{\rm O,0}$). Significant improvement is achieved when using modified form factors. With $q=0.32737$ (consistent with the dipole moment) and $\sigma=\sqrt{2}/2.2\,\si{\angstrom}$ \cite{Sorenson2000}, the discrepancy is reduced to less than $0.5$. Further reduction is obtained by least-squares optimization, yielding $\sigma=0.5870\,\si{\angstrom}$ for the MAFF model.
+    
+    As expected, the new model ($f_{\rm H,2}+f_{\rm O,1}$) with optimized parameters $\sigma=0.6346\,\si{\angstrom}$ and $\alpha=5.1746\,\si{\angstrom}^{-1}$ achieves the best agreement with $I_{\textit{ab initio}}(k)$, demonstrating superior spectral fitting capability.
+    
+    \begin{table}[h!]
+    	\centering
+    	\caption{Optimized parameters and physical validation for gas-phase water models. The charge transfer $q=0.32737$ is fixed by the dipole moment for all modified models.} 
+    	\label{tab:gas}
+    	\renewcommand{\arraystretch}{1.3}
+    	\begin{tabular}{clccc} 
+    		\hline
+    		Exp. & \multicolumn{4}{c}{$d_{\rm OH}=0.9763$\AA; \quad $d_{\rm HH}=1.559$\AA; \quad 1.8546 (Debye)}  \\
+    		\hline
+    		Model & Parameters\quad\quad & Dipole (Debye) & ${\cal R}_{\rm s}^2$ (\AA$^2$) & ${\cal R}_{\rm c}^2$ (\AA$^2$) \\  
+    		\hline
+    		\multirow{2}{2em}{DFT} & PBE0 & \multirow{2}{4em}{1.8486} & \multirow{2}{2em}{1.4642} & \multirow{2}{2em}{0.4066} \\ 
+    		& def2-TZVPD & & & \\   
+    		\hline
+    		\multirow{3}{2em}{$f_{\rm H,2}$ $f_{\rm O,1}$} & $q=0.32737$ & \multirow{3}{4em}{1.8486} & \multirow{3}{2em}{1.4606} & \multirow{3}{2em}{0.4066} \\ 
+    		& $\sigma=0.6346$ & & & \\ 
+    		& $\alpha=5.1746$ & & & \\   
+    		\hline
+    		\multirow{2}{2em}{$f_{\rm H,1}$ $f_{\rm O,1}$} & $q=0.32737$ & \multirow{2}{4em}{1.8486} & \multirow{2}{2em}{1.5045} & \multirow{2}{2em}{0.4066} \\ 
+    		& $\sigma=0.5870$ & & & \\   
+    		\hline
+    		\multirow{2}{2em}{$f_{\rm H,1}$ $f_{\rm O,1}$} & $q=0.32737$ & \multirow{2}{4em}{1.8486} & \multirow{2}{2em}{1.5045} & \multirow{2}{2em}{0.4066} \\ 
+    		& $\sigma=\sqrt{2}/2.2$ & & & \\   
+    		\hline
+    		IAM & $q=0$ & 0 & 1.6025 & 0.5894 \\ 
+    		\hline  
+    	\end{tabular} 
+    \end{table}
+    
+    Table~\ref{tab:gas} lists the optimized parameters and their corresponding physical validations. While all modified models reproduce the correct dipole moment (by construction), the new model shows significant advantages in physical consistency. The intra-atomic spread variance ${\cal R}_{\rm s}^2$, which measures the compactness of atomic orbitals after chemical bonding, is reproduced with only $0.025\%$ error by the new model, an order of magnitude more accurate than the MAFF models. This indicates that the parameter $\alpha$ in the new model not only achieves better spectral fitting (Fig.~\ref{fig:fig2}) but also provides a more physically reasonable description of orbital contraction upon bond formation.
+    
+    The geometric variance ${\cal R}_{\rm c}^2$, which depends only on molecular geometry and charge transfer $q$, is correctly reproduced by all models as expected. The superior performance of the new model in both spectral fitting and physical validation demonstrates that it offers a more precise and physically grounded distribution form and parameters for describing electron density distribution in water molecules.
+    
+    
+    \subsubsection{Water in Bulk-Phase}
+    \label{subsec:bulk_phase}
+    
+    Next, we examine liquid water under ambient conditions. We perform \textit{ab initio} molecular dynamics simulations using the revPBE0/TZV2P-GTH level for an NVE ensemble of 64 water molecules at the experimental mass density of $0.997\,\si{\gram\per\cubic\centi\meter}$ and $T=298.15\,\si{\kelvin}$. A total of 150 independent trajectories are generated from equilibrated SPC/E configurations, each run for 2 ps after 12 ps of equilibration, with a time step of 0.5 fs and configurations sampled every 25 fs.
+    
+    Following the same gradient-based optimization procedure as for the gas phase, we obtain the optimal parameters for bulk water by minimizing the difference between the model prediction and the benchmark $I_{\textit{ab initio}}(k)$.
+    
+    \begin{figure}[h]
+    	\centering
+    	\includegraphics[width=0.5\textwidth]{./figure/bulk/bulk.pdf}
+    	\caption{Comparison of X-ray scattering intensities for bulk water: benchmark DFT result (black solid line), IAM (gray dashed), MAFF with $\sigma=\sqrt{2}/2$ (orange dashed), MAFF with optimized $\sigma$ (green dashed), and the new model with optimized parameters (blue solid).}
+    	\label{fig:bulk_scattering}
+    \end{figure}
+    
+    Figure~\ref{fig:bulk_scattering} compares the scattering intensities computed from different models with their respective optimized parameters for bulk water. From the average molecular dipole moment $\langle\mu\rangle = 2.9244$\,Debye and geometry $\langle d_{\rm OH}\rangle = 0.9859\,\si{\angstrom}$, $\langle d_{\rm HH}\rangle = 1.563\,\si{\angstrom}$, we obtain $q = 0.506702$.
+    
+    As shown in Figure~\ref{fig:bulk_scattering}, the new model ($f_{\rm H,2}+f_{\rm O,1}$) with optimized parameters $\sigma=0.6720\,\si{\angstrom}$ and $\alpha=5.6307\,\si{\angstrom}^{-1}$ achieves the best agreement with $I_{\textit{ab initio}}(k)$ for bulk water, demonstrating consistent superiority across both gas and condensed phases.
+    
+    \begin{table}[h!]
+    	\centering
+    	\caption{Optimized parameters for bulk water models compared with the original MAFF model ($\sigma=\sqrt{2}/2$) suggested by Skinner \textit{et al.}} 
+    	\label{tab:bulk}
+    	\renewcommand{\arraystretch}{1.3}
+    	\begin{tabular}{clccc} 
+    		\hline
+    		Exp. & \multicolumn{4}{c}{$\langle d_{\rm OH}\rangle=0.9859$\AA; \quad $\langle d_{\rm HH}\rangle=1.563$\AA; \quad $\langle\mu\rangle=2.9244$ (Debye)}  \\
+    		\hline
+    		Model & Parameters\quad\quad & Dipole (Debye) & ${\cal R}_{\rm s}^2$ (\AA$^2$) & ${\cal R}_{\rm c}^2$ (\AA$^2$) \\  
+    		\hline
+    		\multirow{2}{2em}{DFT} & revPBE0 & \multirow{2}{4em}{2.9244} & \multirow{2}{2em}{--} & \multirow{2}{2em}{0.3080} \\ 
+    		& TZV2P-GTH & & & \\   
+    		\hline
+    		\multirow{3}{2em}{$f_{\rm H,2}$ $f_{\rm O,1}$} & $q=0.506702$ & \multirow{3}{4em}{2.9244} & \multirow{3}{2em}{1.5278} & \multirow{3}{2em}{0.3080} \\ 
+    		& $\sigma=0.6720$ & & & \\ 
+    		& $\alpha=5.6307$ & & & \\   
+    		\hline
+    		\multirow{2}{2em}{$f_{\rm H,1}$ $f_{\rm O,1}$} & $q=0.506702$ & \multirow{2}{4em}{2.9244} & \multirow{2}{2em}{1.4508} & \multirow{2}{2em}{0.3080} \\ 
+    		& $\sigma=0.6912$ & & & \\   
+    		\hline
+    		\multirow{2}{2em}{$f_{\rm H,1}$ $f_{\rm O,1}$} & $q=0.506702$ & \multirow{2}{4em}{2.9244} & \multirow{2}{2em}{1.4508} & \multirow{2}{2em}{0.3080} \\ 
+    		& $\sigma=\sqrt{2}/2$ & & & \\   
+    		\hline
+    		IAM & $q=0$ & 0 & 1.6025 & 0.5999 \\ 
+    		\hline  
+    	\end{tabular} 
+    \end{table}
+    
+    Table~\ref{tab:bulk} lists the optimized parameters and their corresponding variances. While all modified models reproduce the correct average dipole moment (by construction from $q$), the new model shows distinct values for the intra-atomic spread variance ${\cal R}_{\rm s}^2$. The geometric variance ${\cal R}_{\rm c}^2$, which depends only on molecular geometry and charge transfer $q$, is correctly reproduced by all models as expected from Eq.~(\ref{eq:Rc_physical}).
+    
+    However, in bulk water, electrons cannot be unambiguously attributed to individual molecules, which prevents direct calculation of ${\cal R}_{\rm s}^2$ from the total electron density. An independent validation can be obtained from the system's surface potential. We have previously established a quantitative relationship linking the surface potential contribution from charge delocalization, $\chi_{\text{deloc}}$, to the intramolecular charge distribution:
+    \begin{equation}
+    	\chi_{\text{deloc}} = \dfrac{|e|}{2\varepsilon_0} \rho_{M} (\mathcal{R}_{-}^2 - \mathcal{R}_{+}^2 ), \label{eq:surface_potential}
+    \end{equation}
+    where $\mathcal{R}_{-}^2 = \mathcal{R}_{\text{s}}^2 + \mathcal{R}_{\text{c}}^2$ represents the total delocalization extent of negative charges within the molecule, $\mathcal{R}_{+}^2$ is that of positive charges, and $\rho_{M}$ is the molecular number density in the bulk phase.
+    
+    Using the same computational level as for the bulk simulations, we directly computed the surface potential difference of water to be +4.18 V, with the dipole moment contribution being +0.295 V. The remainder arises from charge delocalization, i.e., the second moment contribution. We employ this result to assess the physical reliability of the optimized parameters in Table~\ref{tab:bulk}.
+    
+    \begin{table}[h!]
+    	\centering
+    	\caption{Surface potential contributions $\chi_{\text{deloc}}$ computed via Eq.~(\ref{eq:surface_potential}) for models and parameters in Table~\ref{tab:bulk}.} 
+    	\label{tab:surface_potential}
+    	\renewcommand{\arraystretch}{1.3}
+    	\begin{tabular}{ccccc} 
+    		\toprule
+    		Model & DFT & $f_{\rm H,2}$ $f_{\rm O,1}$ & $f_{\rm H,1}$ $f_{\rm O,1}$ & IAM \\
+    		\midrule
+    		$\chi_{\text{deloc}}$ (V) & 3.885 & 3.727 & 3.495 & 4.832 \\
+    		\bottomrule
+    	\end{tabular} 
+    \end{table}
+    
+    The $\chi_{\text{deloc}}$ values in Table~\ref{tab:surface_potential} provide an independent physical validation. Among the form factor models, the new model ($f_{\rm H,2}+f_{\rm O,1}$) yields $\chi_{\text{deloc}} = 3.727\,\si{\volt}$, closest to the DFT benchmark of $3.885\,\si{\volt}$. This indicates that the optimized parameters ($q=0.506702$, $\sigma=0.6720\,\si{\angstrom}$, $\alpha=5.6307\,\si{\angstrom}^{-1}$) not only achieve superior spectral fitting (Fig.~\ref{fig:bulk_scattering}) but also provide a physically accurate description of electron delocalization, as validated by the surface potential.
+    
+    
+    \newpage 
+    \section{Structure Resolution from Experimental Scattering Spectra}
+  	
+  	
+  
+\bibliographystyle{unsrt}
+\bibliography{refXray}
+\end{document}
