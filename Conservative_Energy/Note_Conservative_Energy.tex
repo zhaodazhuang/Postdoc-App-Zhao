@@ -1,0 +1,169 @@
+\documentclass[12pt]{article}
+
+\usepackage{fullpage}
+\usepackage{url}
+\usepackage{natbib}
+\usepackage{amsmath,mathrsfs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+
+\pagestyle{empty}
+
+\begin{document}
+	
+	\noindent Yihao Zhao \\
+	A Note on Energy Conservation in Conservative Systems \\
+	\today
+	\bigskip
+	
+	A conservative system is one in which all forces $\mathbf{F}$ are derived from the gradient of an interaction potential $V(\mathbf{r})$, with no non-conservative forces such as friction present. It can be proven that such a system must conserve energy:
+	\begin{equation}
+		\mathbf{F}= -\nabla V(\mathbf{r}) \label{eq:FV}
+	\end{equation}
+	Given $\mathbf{F} = m\dfrac{d\mathbf{v}}{dt}$, it follows that:
+	\begin{equation}
+		\bigg{[}m \dfrac{d\mathbf{v}}{dt} + \nabla V(\mathbf{r}) \bigg{]} \dfrac{d\mathbf{r}}{dt} = \dfrac{d}{dt}\bigg{[}\dfrac{1}{2}m v^2 + V(\mathbf{r}) \bigg{]} = 0 \label{eq:ESer}
+	\end{equation}
+	The total energy does not change with time, which is a succinct and clear proof.\par
+	
+	However, in practical simulations, the applied potential functions take on various complex forms and are subject to other interfering factors,
+	leading to the misconception that Eq.~(\ref{eq:FV}) is no longer a sufficient condition for energy conservation in numerical simulations.
+	In this section, we will use two common scenarios to demonstrate that it indeed remains valid in molecular simulations.\par
+
+    \subsubsection{Energy-Conserving Method for Truncated Potentials: Variable Time-Step Dynamics}
+    
+    In molecular simulations, it is necessary to truncate the interaction potential. After truncation, the potential is often smoothed near the cutoff distance $r_c$ to enable energy-conserving microcanonical $(N,V,E)$ ensemble sampling. It is commonly believed that the original truncated potential,
+    \begin{equation}
+    	u_c(r) =
+    	\begin{cases}
+    		u(r) & r \le r_c \\
+    		0 & r > r_c
+    	\end{cases}
+    	\label{eq:u_c1}
+    \end{equation}
+    cannot be used for $(N,V,E)$ sampling, and practical simulations seem to confirm this. This is because the force used in the simulation,
+    \begin{equation}
+    	\mathbf{F}_c=
+    	\begin{cases}
+    		-\nabla u(r) & r \le r_c \\
+    		0 & r > r_c
+    	\end{cases} \label{eq:F_c}
+    \end{equation}
+    is not the exact negative gradient of $u_c(r)$.\par
+    
+    Rewriting $u_c(r)$ using the Heaviside step function,
+    \begin{equation}
+    	u_c(r) = u(r) H(r_c-r) \label{eq:u_c2}
+    \end{equation}
+    which is fully equivalent to Eq.~(\ref{eq:u_c1}), its negative gradient is:
+    \begin{align}
+    	-\nabla u_c(r) =& -\nabla [u(r) H(r_c-r)] \notag \\
+    	=& [-\nabla u(r)] H(r_c-r) - u(r) \nabla H(r_c-r) \notag \\
+    	=& \mathbf{F}_c + u(r) \delta(r_c-r)
+    \end{align}
+    Compared to Eq.~(\ref{eq:F_c}), there is an extra term containing a delta function $\delta(r_c-r)$, which has the dimension of force.
+    Generally, the delta function $\delta(r_c-r)$ represents an impulse at $r = r_c$. In dynamics, its meaning can be explained with an illustration. \\ \par
+    
+    \begin{figure}[H]
+    	\centering
+    	\includegraphics[width=0.85\linewidth]{./cutur/cutur.pdf}
+    	\caption{\label{fig:cutur} Variation of standard Ewald interaction strength with distance.}
+    \end{figure}
+    
+    As illustrated in Fig.~\ref{fig:cutur}, when a particle moves on this potential energy surface, it encounters a potential cliff of magnitude $u(r_c)$ at the cutoff distance $r_c$. When the particle leaves the interaction range and ``descends the cliff'' (moving from left to right in the figure), its potential energy changes instantaneously. This corresponds to the impulse $u(r) \delta(r_c - r)$, and the change in potential energy is inherited by the kinetic energy. Therefore, when the particle reaches $r_c$, it should satisfy:
+    \begin{equation}
+    	\dfrac{1}{2} m v_{\text{new}}^2 = \dfrac{1}{2} m v_{\text{old}}^2 \pm u(r_c)
+    \end{equation}
+    where the $\pm$ sign corresponds to ``descending'' and ``ascending'' the cliff, respectively. Hence, special consideration is required when a particle crosses $r_c$.\par
+    
+    Furthermore, due to the discrete nature of the time-stepping in the dynamics, the crossing of $r_c$ must be handled with care. Consider a particle moving from $r_B$ to $r_A$ over a fixed time step $\Delta$ starting at time $t$. With mass set to 1, the velocity update in the Velocity Verlet algorithm is:
+    \begin{equation}
+    	\mathbf{v}(t+\Delta) = \mathbf{v}(t) + \dfrac{\mathbf{F}_B + \mathbf{F}_A}{2} \Delta
+    \end{equation}
+    This is analogous to the trapezoidal rule, approximating the force acting on the particle during the segment $r_B \to r_A$ as the average of $\mathbf{F}_B$ and $\mathbf{F}_A$. This approximation is exact if the force varies linearly. However, as indicated by the specially marked red dashed line in the figure, the particle experiences force only over the short distance $r_B \to r_c$ and experiences no acceleration from $r_c \to r_A$. This introduces a spurious increase in the particle's kinetic energy, violating total energy conservation. We refer to this artifact as the ``crossing the cliff'' phenomenon.\par
+    
+    The correct approach is to split the integration step at the exact moment the particle crosses $r_c$. Suppose the time for the particle to travel from $r_B$ to $r_c$ is $\tau$. The effective acceleration for this first segment should be:
+    \begin{equation}
+    	\dfrac{1}{2} \left[ \mathbf{F}_B + \mathbf{F}(t+\tau) \right], \qquad \text{where } \mathbf{F}(t+\tau) = - \nabla u(r) \big|_{r=r_c^-}
+    \end{equation}
+    Upon entering the $r_c \to r_A$ segment, it becomes:
+    \begin{equation}
+    	\dfrac{1}{2} \left[ \mathbf{F}(t+\tau) + \mathbf{F}_A \right], \qquad \text{where } \mathbf{F}(t+\tau) = \mathbf{0}
+    \end{equation}
+    Note that the force $\mathbf{F}(t+\tau)$ at $r_c$ takes on the two different states above, depending on whether the particle is being averaged over the $r > r_c$ or the $r < r_c$ region. The same logic applies for the reverse path $r_A \to r_B$.\par
+
+
+
+    \begin{figure}[H]
+    	\centering
+    	\includegraphics[width=\linewidth]{./Var_dt_flow/Var_dt_flow.pdf}
+    	\caption{Flowchart of the variable time-step dynamics algorithm.\\[2pt]
+    		\footnotesize Note: $r_{ij}'(t+\Delta)$ is the hypothetical distance after evolution with the original fixed time step $\Delta$.}
+    \end{figure}
+    
+    The time step $\tau$ must be calculated precisely. In the Velocity Verlet algorithm:
+    \begin{equation}
+    	\mathbf{r}_i(t + \Delta) = \mathbf{r}_i(t) + \mathbf{v}_i(t)\Delta + \dfrac{1}{2} \mathbf{F}_i \Delta^2 
+    \end{equation}
+    Setting $r_{ij} = r_c$ when $\Delta = \tau$ leads to a quartic equation:
+    \begin{equation}
+    	a\tau^4 + b \tau^3 + c\tau^2 + d\tau + e = 0
+    \end{equation}
+    The smallest positive real root $\tau$ can be obtained using standard quartic formula \cite{a}. The coefficients are:
+    \begin{align}
+    	a  = \dfrac{1}{4} F_{ij}^2, &\quad b= \mathbf{F}_{ij}\cdot \mathbf{v}_{ij}, &\quad c=\mathbf{F}_{ij}\cdot \mathbf{r}_{ij} +  \mathbf{v}_{ij}^2  \notag \\
+    	d=2\mathbf{v}_{ij}\cdot \mathbf{r}_{ij}, &\quad e = r_{ij}^2 - r_c^2  &
+    \end{align} \par
+    
+    \begin{figure}[h]
+    	\centering
+    	\includegraphics[width=0.85\linewidth]{./Lj36Econser/Lj36Econser.pdf}
+    	\caption{\label{fig:Lj36Econser} Total energy as a function of time for the model system.\\[2pt]
+    		\footnotesize Note: A two-dimensional system with 36 particles. All trajectories start from the same initial configuration and velocities. The energy curve for the smoothed potential $u_c^s(r)$ is shifted downward because the smoothing alters the potential energy landscape.}
+    \end{figure}
+    
+    As shown in Fig.~\ref{fig:Lj36Econser}, a model system where particles interact solely via the Lennard-Jones potential:
+    \begin{equation}
+    	u(r) = \varepsilon[r^{-12}-{r}^{-6}]
+    \end{equation}
+    with $\varepsilon = 400$ J/mol, is studied. The potential is truncated at $r_c=1.3$ \AA{} with a time step $\Delta = 5$ fs. ``Fixed $\Delta$, $u_c(r)$'' denotes the fixed time-step simulation without any processing of $u_c(r)$; ``Fixed $\Delta$, $u_c^s(r)$'' denotes the fixed time-step simulation with a smoothed $u_c(r)$; ``Var. $\tau$, $u_c(r)$'' denotes the variable time-step algorithm applied to the unprocessed $u_c(r)$. It can be seen that the ``Fixed $\Delta$, $u_c(r)$'' simulation exhibits non-conservation with a continuous energy increase. In contrast, energy conservation is restored (with fluctuations arising from the trapezoidal integration approximation) either by smoothing the potential or by employing the variable time-step algorithm. The average value of $\tau$ is 4.9995 fs, which does not lead to a significant difference in the trapezoidal integration error compared to the fixed-step methods.\par
+    
+    The variable time-step algorithm is not a practical method due to its extremely high computational cost. Moreover, it requires particles to have relatively low velocities, as high velocities amplify the numerical uncertainty in the computed $\tau$ value, affecting the precision of determining when the particle reaches $r_c$. Having resolved the ``crossing the cliff'' phenomenon, this algorithm proves our stated principle: as long as the force is strictly the negative gradient of the potential energy, then the total energy of the system is conserved.\par
+
+    \subsubsection{Energy Non-Conservation Problem in Neural Network Potentials with Electronic Degrees of Freedom}
+    
+    Current neural network or machine learning molecular dynamics simulations often incorporate electronic degrees of freedom $\{\mathbf{e}\}$. In such cases, a common error is the failure to ensure that the computed forces are strictly the negative gradient of the potential energy. We illustrate this through the following derivation.\par
+    
+    Let the nuclear coordinates be $\{ \mathbf{r} \}$. The total potential energy of the system comprises three parts: nucleus-nucleus, nucleus-electron, and electron-electron interactions:
+    \begin{equation}
+    	U = U_{c-c}(\{ \mathbf{r} \}) + U_{c-e}(\{\mathbf{r}\}, \{\mathbf{e}\}) + U_{e-e}(\{ \mathbf{e}\})
+    \end{equation}
+    The force on a nucleus is typically computed as:
+    \begin{equation}
+    	\mathbf{F}_i = -\nabla_{\mathbf{r}_i} \big[ U_{c-c} + U_{c-e} \big] \label{eq:BOFi}
+    \end{equation}
+    However, the electronic positions are functions of the nuclear coordinates:
+    \begin{equation}
+    	\mathbf{e} = \mathbf{e}(\{\mathbf{r}\})
+    \end{equation}
+    Therefore, the exact negative gradient of the potential energy with respect to nuclear coordinates is:
+    \begin{align}
+    	\mathbf{F}_i =& -\nabla_{\mathbf{r}_i} \big[ U_{c-c} + U_{c-e} \big] \notag \\
+    	& - \sum_{a} (\nabla_{\mathbf{r}_i} \mathbf{e}_a )^T \, \nabla_{\mathbf{e}_a} \big[ U_{c-c} + U_{c-e} \big] \label{eq:BOFii}
+    \end{align}
+    Compared to the common practice in Eq.~(\ref{eq:BOFi}), an additional term appears, which contains the force on the electrons:
+    \begin{equation}
+    	\mathbf{F}_{\mathbf{e}_a} = -\nabla_{\mathbf{e}_a} \big[ U_{c-c} + U_{c-e} \big]
+    \end{equation}
+    Only under the adiabatic approximation, when the electrons relax to the minimum of the potential energy surface ($\mathbf{F}_{\mathbf{e}_a}=0$), does Eq.~(\ref{eq:BOFi}) become equivalent to Eq.~(\ref{eq:BOFii}).\par
+    
+    Existing neural network dynamics methods, such as SCFNN （Nature Communications volume 13, Article number: 1572, 2022）, suffer from precisely this issue. Their procedure is as follows:
+    \begin{itemize}
+    	\item The electronic coordinates (MLWFCs in the original work, denoted as $\mathbf{r}_w$) are passed through Module1, a network trained using linear response theory, to obtain a predicted equilibrium position $\mathbf{r}_{\mathbf{w}}^0$.
+    	\item Only the electric field $E(\mathbf{R})$ at the nuclear positions (approximated by $E(\mathbf{r}_w^0)$ due to the proximity of electrons and nuclei) and the nuclear positions $\mathbf{R}$ are then fed into Module2, which outputs the forces on the nuclei.
+    \end{itemize}
+    SCFNN cannot perform microcanonical $(N,V,E)$ simulations precisely because the equilibrium position obtained from Module1 is approximate and does not correspond to the exact condition $\mathbf{F}_{\mathbf{e}_a}=0$. Furthermore, since Module2 does not receive the electronic coordinates as input, it is fundamentally incapable of computing the potential energy gradient with respect to $\mathbf{R}$ via the chain rule through $\mathbf{r}_{\mathbf{w}}^0$.\par  
+	
+\end{document}
